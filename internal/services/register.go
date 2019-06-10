@@ -30,19 +30,19 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 		EmployeeCount:        0,
 		Designation:          "",
 		ConfirmationAccepted: false,
+		DetailsRegistered:    false,
 	}
 	err := database.AddNewUser(db, &user)
 	if err != nil {
 		logger.Log.Error(err.Error())
-		genErr := models.GeneralResponse{
+		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    500,
 				Message: err.Error(),
 			},
 			Message: "Error occurred when trying to process the request",
-		}
-		return register.NewPostRegisterInternalServerError().WithPayload(&genErr)
+		})
 	}
 	logger.Log.Info("User added to database..")
 
@@ -67,12 +67,11 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 	}
 	logger.Log.Info("Registration Confirmation Email Sent..")
 
-	resp := models.GeneralResponse{
+	return register.NewPostRegisterOK().WithPayload(&models.GeneralResponse{
 		Success: true,
 		Error:   nil,
 		Message: "Registration Initial Step Success, Email Confirmation Sent..",
-	}
-	return register.NewPostRegisterOK().WithPayload(&resp)
+	})
 }
 
 // HandleRegisterDetails Function
@@ -90,33 +89,54 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	if err != nil {
 		logger.Log.Error(err.Error())
 	}
+
+	if !user.ConfirmationAccepted {
+		return register.NewPostRegisterDetailsForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "Forbidden, the user has not accepted the email confirmation",
+			},
+			Message: "Please confirm your email address to proceed",
+		})
+	}
+
+	if user.DetailsRegistered {
+		return register.NewPostRegisterDetailsForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "Forbidden, the user already registered organization details",
+			},
+			Message: "Already registered, please login to continue",
+		})
+	}
+
 	user.Role = "user"
 	user.EmployeeCount = int(empCount)
 	user.Organization = params.RegisterRequest.Organization.(string)
 	user.Designation = params.RegisterRequest.Designation.(string)
-	user.ConfirmationAccepted = true
+	user.DetailsRegistered = true
 
 	err = database.UpdateUser(db, user)
 	if err != nil {
 		logger.Log.Error(err.Error())
-		genErr := models.GeneralResponse{
+		return register.NewPostRegisterDetailsInternalServerError().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    500,
 				Message: err.Error(),
 			},
 			Message: "Error occurred when trying to process the request",
-		}
-		return register.NewPostRegisterDetailsInternalServerError().WithPayload(&genErr)
+		})
 	}
 	logger.Log.Info("Registration Details added..")
 
-	resp := models.GeneralResponse{
+	return register.NewPostRegisterDetailsOK().WithPayload(&models.GeneralResponse{
 		Success: true,
 		Error:   nil,
 		Message: "User Registration success, Continue to Login..",
-	}
-	return register.NewPostRegisterDetailsOK().WithPayload(&resp)
+	})
 }
 
 // HandleRegisterConfirmation Function
@@ -132,10 +152,28 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 	}
 	logger.Log.Info(claims.Email)
 
-	resp := models.GeneralResponse{
+	user, err := database.SelectOneUser(db, claims.Email)
+	if err != nil {
+		logger.Log.Error(err.Error())
+	}
+	user.ConfirmationAccepted = true
+
+	err = database.UpdateUser(db, user)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return register.NewPostRegisterDetailsInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: err.Error(),
+			},
+			Message: "Error occurred when trying to process the request",
+		})
+	}
+
+	return register.NewGetRegisterConfirmationTokenOK().WithPayload(&models.GeneralResponse{
 		Success: true,
 		Error:   nil,
 		Message: "User Confirmation success, Proceed to Details Registration..",
-	}
-	return register.NewGetRegisterConfirmationTokenOK().WithPayload(&resp)
+	})
 }

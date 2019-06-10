@@ -17,6 +17,7 @@ type UserAuth struct {
 	EmployeeCount        int
 	Designation          string
 	ConfirmationAccepted bool
+	DetailsRegistered    bool
 }
 
 // CreateUserAuthSchema Function
