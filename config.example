@@ -1,0 +1,9 @@
+logger-output-path: output/logger.log
+
+sendgrid-apikey: 
+jwt-secret: 
+
+pgdb:
+  username: 
+  password: 
+  database: 
