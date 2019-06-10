@@ -4,8 +4,10 @@ import (
 	"time"
 
 	"github.com/Prashanth-GS/test-swagger/internal/logger"
+	"github.com/Prashanth-GS/test-swagger/models"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -48,18 +50,30 @@ func CreateJWT(params *register.PostRegisterParams) (string, error) {
 }
 
 // ValidateJWT Function
-func ValidateJWT(tknStr string) (*Claims, error) {
+func ValidateJWT(tknStr string) (*Claims, middleware.Responder, error) {
 	claims := &Claims{}
 	_, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return JWTKey, nil
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			logger.Log.Error("Unauthorized..")
-			return claims, err
+			return claims, register.NewGetRegisterConfirmationTokenUnauthorized().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    500,
+					Message: "Token is Invalid",
+				},
+				Message: "Unauthorized, Please reregister to continue..",
+			}), err
 		}
-		logger.Log.Error("Bad Request..")
-		return claims, err
+		return claims, register.NewGetRegisterConfirmationTokenBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "Token validation produced an error",
+			},
+			Message: "Bad Request, Please reregister to continue..",
+		}), err
 	}
-	return claims, nil
+	return claims, nil, nil
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/Prashanth-GS/test-swagger/models"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-pg/pg"
 	"github.com/sendgrid/sendgrid-go"
@@ -127,26 +126,9 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 	// Process JWT
 	tknStr := params.Token
 
-	claims, err := ValidateJWT(tknStr)
+	claims, response, err := ValidateJWT(tknStr)
 	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return register.NewGetRegisterConfirmationTokenUnauthorized().WithPayload(&models.GeneralResponse{
-				Success: false,
-				Error: &models.GeneralResponseError{
-					Code:    500,
-					Message: "Token is Invalid",
-				},
-				Message: "Unauthorized, Please reregister to continue..",
-			})
-		}
-		return register.NewGetRegisterConfirmationTokenBadRequest().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    500,
-				Message: "Token validation produced an error",
-			},
-			Message: "Bad Request, Please reregister to continue..",
-		})
+		return response
 	}
 	logger.Log.Info(claims.Email)
 
