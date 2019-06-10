@@ -16,8 +16,8 @@ type UserAuth struct {
 	Organization         string
 	EmployeeCount        int
 	Designation          string
-	ConfirmationAccepted bool
-	DetailsRegistered    bool
+	ConfirmationAccepted bool `sql:"default: false"`
+	DetailsRegistered    bool `sql:"default: false"`
 }
 
 // CreateUserAuthSchema Function
@@ -48,9 +48,6 @@ func SelectAllUsers(db *pg.DB) error {
 		return err
 	}
 
-	// for _, u := range users {
-	// 	logger.Log.Info(u.String())
-	// }
 	return nil
 }
 
@@ -63,7 +60,6 @@ func SelectOneUser(db *pg.DB, email string) (*UserAuth, error) {
 		return user, err
 	}
 
-	// logger.Log.Info(user.String())
 	return user, nil
 }
 

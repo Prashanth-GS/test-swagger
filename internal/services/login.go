@@ -18,9 +18,18 @@ func HandleLogin(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 		" " + params.LoginRequest.Email.(string) + " " + params.LoginRequest.Password.(string))
 
 	user, err := database.SelectOneUser(db, params.LoginRequest.Email.(string))
-	logger.Log.Info(user.Password + " === " + params.LoginRequest.Password.(string))
 	if err != nil {
 		logger.Log.Error(err.Error())
+		if err == pg.ErrNoRows {
+			return login.NewPostLoginNotFound().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    404,
+					Message: "Given email is not found in the database",
+				},
+				Message: "Email is not registered, please register before logging in",
+			})
+		}
 	}
 	if user.Password != params.LoginRequest.Password.(string) {
 		return login.NewPostLoginUnauthorized().WithPayload(&models.GeneralResponse{

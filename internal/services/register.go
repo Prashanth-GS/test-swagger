@@ -91,6 +91,7 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	}
 
 	if !user.ConfirmationAccepted {
+		logger.Log.Info(user.Email + "User has not confirmed the email address..")
 		return register.NewPostRegisterDetailsForbidden().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
@@ -102,6 +103,7 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	}
 
 	if user.DetailsRegistered {
+		logger.Log.Info(user.Email + "User has already registered organization details..")
 		return register.NewPostRegisterDetailsForbidden().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
