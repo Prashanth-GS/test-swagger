@@ -1,0 +1,13 @@
+type: object
+properties:
+  success:
+    success: boolean
+  error:
+    error: object
+    properties:
+      code:
+        code: int
+      message:
+        message: string
+  message:
+    message: string

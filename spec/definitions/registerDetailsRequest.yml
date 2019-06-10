@@ -1,0 +1,10 @@
+type: object
+properties:
+  email:
+    email: string
+  organization:
+    organization: string
+  employeeCount:
+    employeeCount: int
+  designation:
+    designation: string

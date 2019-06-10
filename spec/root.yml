@@ -1,0 +1,29 @@
+swagger: '2.0'
+info:
+  title: Auth Service
+  description: Authentication Service API
+  contact:
+    name: NEWS API Support
+  version: 1.0.0
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /register:
+    $ref: ./paths/register.yml
+  /register-confirmation/{token}:
+    $ref: ./paths/registerConfirmation.yml
+  /register-details:
+    $ref: ./paths/registerDetails.yml
+  /login:
+    $ref: ./paths/login.yml
+definitions:
+  generalResponse:
+    $ref: ./definitions/generalResponse.yml
+  loginResponse:
+    $ref: ./definitions/loginResponse.yml
+
+basePath: /news-api/v1
