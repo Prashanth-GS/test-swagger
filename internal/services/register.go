@@ -21,6 +21,29 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 	logger.Log.Info("Register called with parameters: " + params.RegisterRequest.Type +
 		" " + params.RegisterRequest.Email.(string) + " " + params.RegisterRequest.Password.(string))
 
+	_, err := database.SelectOneUser(db, params.RegisterRequest.Email.(string))
+	if err == nil {
+		return register.NewPostRegisterForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "Given email is already registered",
+			},
+			Message: "Email is already registered, please continue to login or register using a different email address.",
+		})
+	}
+	logger.Log.Error(err.Error())
+	if err != pg.ErrNoRows {
+		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "Error while querying the database",
+			},
+			Message: "Something went wrong, please try again later.",
+		})
+	}
+
 	// Save the user to the database..
 	user := database.UserAuth{
 		Email:                params.RegisterRequest.Email.(string),
@@ -32,7 +55,7 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 		ConfirmationAccepted: false,
 		DetailsRegistered:    false,
 	}
-	err := database.AddNewUser(db, &user)
+	err = database.AddNewUser(db, &user)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
