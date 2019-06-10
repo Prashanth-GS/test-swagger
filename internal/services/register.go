@@ -175,12 +175,24 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 	if err != nil {
 		return response
 	}
-	logger.Log.Info(claims.Email)
 
 	user, err := database.SelectOneUser(db, claims.Email)
 	if err != nil {
 		logger.Log.Error(err.Error())
 	}
+
+	if user.DetailsRegistered {
+		logger.Log.Info("User has already registered organization information..")
+		return register.NewGetRegisterConfirmationTokenBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "User has already registered organization information",
+			},
+			Message: "Organization details already submitted, please cntinue to login.",
+		})
+	}
+
 	user.ConfirmationAccepted = true
 
 	err = database.UpdateUser(db, user)
