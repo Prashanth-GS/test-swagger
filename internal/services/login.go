@@ -223,10 +223,27 @@ func HandleResetPassword(db *pg.DB, params *login.PostResetPasswordParams) middl
 func HandleResetPasswordConfirmation(params *login.GetResetPasswordConfirmationTokenParams) middleware.Responder {
 	logger.Log.Info("ResetPasswordConfirmation called with Parameter: " + params.Token)
 
-	claims, response, err := ValidateJWT(params.Token)
+	claims, err := ValidateJWT(params.Token)
 	if err != nil {
 		logger.Log.Error(err.Error())
-		return response
+		if err == jwt.ErrSignatureInvalid {
+			return login.NewGetResetPasswordConfirmationTokenUnauthorized().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    401,
+					Message: "Token is Invalid",
+				},
+				Message: "Unauthorized, Please request again to continue..",
+			})
+		}
+		return login.NewGetResetPasswordConfirmationTokenBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Token validation produced an error",
+			},
+			Message: "Bad Request, Please try again to continue..",
+		})
 	}
 
 	return login.NewGetResetPasswordConfirmationTokenOK().WithPayload(&models.UserEmailResponse{

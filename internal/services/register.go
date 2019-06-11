@@ -8,6 +8,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/internal/logger"
 	"github.com/Prashanth-GS/test-swagger/models"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-pg/pg"
@@ -100,6 +101,14 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 	_, err = client.Send(message)
 	if err != nil {
 		logger.Log.Info(err.Error())
+		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: err.Error(),
+			},
+			Message: "Error occurred when trying to send the email",
+		})
 	}
 	logger.Log.Info("Registration Confirmation Email Sent..")
 
@@ -147,7 +156,7 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 						Code:    404,
 						Message: "Given email is not found in the database",
 					},
-					Message: "Email is not registered, please register before logging in",
+					Message: "Email is not registered, please register before registering organization details",
 				})
 			}
 		}
@@ -210,15 +219,49 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 
 	// Process JWT
 	tknStr := params.Token
-
-	claims, response, err := ValidateJWT(tknStr)
+	claims, err := ValidateJWT(tknStr)
 	if err != nil {
-		return response
+		if err == jwt.ErrSignatureInvalid {
+			return register.NewGetRegisterConfirmationTokenUnauthorized().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    401,
+					Message: "Token is Invalid",
+				},
+				Message: "Unauthorized, Please reregister to continue..",
+			})
+		}
+		return register.NewGetRegisterConfirmationTokenBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Token validation produced an error",
+			},
+			Message: "Bad Request, Please reregister to continue..",
+		})
 	}
 
 	user, err := database.SelectOneUser(db, claims.Email)
 	if err != nil {
 		logger.Log.Error(err.Error())
+		if err == pg.ErrNoRows {
+			return register.NewGetRegisterConfirmationTokenNotFound().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    404,
+					Message: err.Error(),
+				},
+				Message: "User does not exist, please register to continue.",
+			})
+		}
+		return register.NewGetRegisterConfirmationTokenInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: err.Error(),
+			},
+			Message: "Error occurred when trying to process the request",
+		})
 	}
 
 	if user.DetailsRegistered {
@@ -229,7 +272,7 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 				Code:    400,
 				Message: "User has already registered organization information",
 			},
-			Message: "Organization details already submitted, please cntinue to login.",
+			Message: "Organization details already submitted, please continue to login.",
 		})
 	}
 
