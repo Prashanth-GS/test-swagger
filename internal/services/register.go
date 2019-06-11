@@ -18,6 +18,19 @@ import (
 
 // HandleRegister Function
 func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.Responder {
+	if params.RegisterRequest.Email == nil || params.RegisterRequest.Email == "" ||
+		params.RegisterRequest.Password == nil || params.RegisterRequest.Password == "" ||
+		params.RegisterRequest.Type == "" {
+		logger.Log.Error("BadRequest - Invalid parameters..")
+		return register.NewPostRegisterBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Invalid Parameters",
+			},
+			Message: "Invalid parameters",
+		})
+	}
 	logger.Log.Info("Register called with parameters: " + params.RegisterRequest.Type +
 		" " + params.RegisterRequest.Email.(string) + " " + params.RegisterRequest.Password.(string))
 
@@ -70,8 +83,8 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 	logger.Log.Info("User added to database..")
 
 	// Send Email to the user..
-	to := mail.NewEmail("Example User", params.RegisterRequest.Email.(string))
-	jwtToken, err := CreateJWT(params)
+	to := mail.NewEmail("GSOP Support", params.RegisterRequest.Email.(string))
+	jwtToken, err := CreateJWT(params.RegisterRequest.Email.(string))
 	if err != nil {
 		logger.Log.Error(err.Error())
 	}
@@ -99,6 +112,20 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 
 // HandleRegisterDetails Function
 func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams) middleware.Responder {
+	if params.RegisterRequest.Email == nil || params.RegisterRequest.Email == "" ||
+		params.RegisterRequest.Organization == nil || params.RegisterRequest.Organization == "" ||
+		params.RegisterRequest.Designation == nil || params.RegisterRequest.Designation == "" ||
+		params.RegisterRequest.EmployeeCount == nil || params.RegisterRequest.EmployeeCount == "" {
+		logger.Log.Error("BadRequest - Invalid parameters..")
+		return register.NewPostRegisterBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Invalid Parameters",
+			},
+			Message: "Invalid parameters",
+		})
+	}
 	logger.Log.Info("Register Details called with parameters: " + params.RegisterRequest.Email.(string) +
 		" " + params.RegisterRequest.Organization.(string) + " " + params.RegisterRequest.Designation.(string) +
 		" " + string(params.RegisterRequest.EmployeeCount.(json.Number)))
@@ -111,6 +138,19 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	user, err := database.SelectOneUser(db, params.RegisterRequest.Email.(string))
 	if err != nil {
 		logger.Log.Error(err.Error())
+		if err != nil {
+			logger.Log.Error(err.Error())
+			if err == pg.ErrNoRows {
+				return register.NewPostRegisterDetailsNotFound().WithPayload(&models.GeneralResponse{
+					Success: false,
+					Error: &models.GeneralResponseError{
+						Code:    404,
+						Message: "Given email is not found in the database",
+					},
+					Message: "Email is not registered, please register before logging in",
+				})
+			}
+		}
 	}
 
 	if !user.ConfirmationAccepted {

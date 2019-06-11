@@ -89,6 +89,21 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.HandleRegisterDetails(db, &params)
 		})
 	}
+	if api.LoginGetResetPasswordRequestEmailHandler == nil {
+		api.LoginGetResetPasswordRequestEmailHandler = login.GetResetPasswordRequestEmailHandlerFunc(func(params login.GetResetPasswordRequestEmailParams) middleware.Responder {
+			return services.HandleResetPasswordRequest(db, &params)
+		})
+	}
+	if api.LoginPostResetPasswordHandler == nil {
+		api.LoginPostResetPasswordHandler = login.PostResetPasswordHandlerFunc(func(params login.PostResetPasswordParams) middleware.Responder {
+			return services.HandleResetPassword(db, &params)
+		})
+	}
+	if api.LoginGetResetPasswordConfirmationTokenHandler == nil {
+		api.LoginGetResetPasswordConfirmationTokenHandler = login.GetResetPasswordConfirmationTokenHandlerFunc(func(params login.GetResetPasswordConfirmationTokenParams) middleware.Responder {
+			return services.HandleResetPasswordConfirmation(&params)
+		})
+	}
 
 	api.ServerShutdown = func() {}
 

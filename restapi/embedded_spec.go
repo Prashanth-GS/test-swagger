@@ -49,6 +49,15 @@ func init() {
     },
     "/register-details": {
       "$ref": "./paths/registerDetails.yml"
+    },
+    "/reset-password": {
+      "$ref": "./paths/resetPassword.yml"
+    },
+    "/reset-password-confirmation/{token}": {
+      "$ref": "./paths/resetPasswordConf.yml"
+    },
+    "/reset-password-request/{email}": {
+      "$ref": "./paths/resetPasswordReq.yml"
     }
   },
   "definitions": {
@@ -295,6 +304,166 @@ func init() {
           }
         }
       }
+    },
+    "/reset-password": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "parameters": [
+          {
+            "name": "passwordRequest",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/passwordRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reset-password-confirmation/{token}": {
+      "get": {
+        "tags": [
+          "login"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "token",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/userEmailResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reset-password-request/{email}": {
+      "get": {
+        "tags": [
+          "login"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -364,6 +533,17 @@ func init() {
         }
       }
     },
+    "passwordRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "email": "string"
+        },
+        "password": {
+          "password": "string"
+        }
+      }
+    },
     "registerDetailsRequest": {
       "type": "object",
       "properties": {
@@ -392,6 +572,36 @@ func init() {
         },
         "type": {
           "type": "string"
+        }
+      }
+    },
+    "userEmailResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "properties": {
+            "email": {
+              "email": "string"
+            },
+            "message": {
+              "message": "string"
+            }
+          },
+          "response": "object"
+        },
+        "error": {
+          "properties": {
+            "code": {
+              "code": "int"
+            },
+            "message": {
+              "message": "string"
+            }
+          },
+          "error": "object"
+        },
+        "success": {
+          "success": "boolean"
         }
       }
     }

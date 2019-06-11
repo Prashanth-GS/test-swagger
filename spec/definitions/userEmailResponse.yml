@@ -1,0 +1,18 @@
+type: object
+properties:
+  success:
+    success: boolean
+  error:
+    error: object
+    properties:
+      code:
+        code: int
+      message:
+        message: string
+  data:
+    response: object
+    properties:
+      email:
+        email: string
+      message:
+        message: string

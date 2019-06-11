@@ -40,10 +40,13 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		RegisterGetRegisterConfirmationTokenHandler: nil,
-		LoginPostLoginHandler:                       nil,
-		RegisterPostRegisterHandler:                 nil,
-		RegisterPostRegisterDetailsHandler:          nil,
+		RegisterGetRegisterConfirmationTokenHandler:   nil,
+		LoginGetResetPasswordConfirmationTokenHandler: nil,
+		LoginGetResetPasswordRequestEmailHandler:      nil,
+		LoginPostLoginHandler:                         nil,
+		RegisterPostRegisterHandler:                   nil,
+		RegisterPostRegisterDetailsHandler:            nil,
+		LoginPostResetPasswordHandler:                 nil,
 	}
 }
 
@@ -77,12 +80,18 @@ type AuthServiceAPI struct {
 
 	// RegisterGetRegisterConfirmationTokenHandler sets the operation handler for the get register confirmation token operation
 	RegisterGetRegisterConfirmationTokenHandler register.GetRegisterConfirmationTokenHandler
+	// LoginGetResetPasswordConfirmationTokenHandler sets the operation handler for the get reset password confirmation token operation
+	LoginGetResetPasswordConfirmationTokenHandler login.GetResetPasswordConfirmationTokenHandler
+	// LoginGetResetPasswordRequestEmailHandler sets the operation handler for the get reset password request email operation
+	LoginGetResetPasswordRequestEmailHandler login.GetResetPasswordRequestEmailHandler
 	// LoginPostLoginHandler sets the operation handler for the post login operation
 	LoginPostLoginHandler login.PostLoginHandler
 	// RegisterPostRegisterHandler sets the operation handler for the post register operation
 	RegisterPostRegisterHandler register.PostRegisterHandler
 	// RegisterPostRegisterDetailsHandler sets the operation handler for the post register details operation
 	RegisterPostRegisterDetailsHandler register.PostRegisterDetailsHandler
+	// LoginPostResetPasswordHandler sets the operation handler for the post reset password operation
+	LoginPostResetPasswordHandler login.PostResetPasswordHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -150,6 +159,14 @@ func (o *AuthServiceAPI) Validate() error {
 		unregistered = append(unregistered, "register.GetRegisterConfirmationTokenHandler")
 	}
 
+	if o.LoginGetResetPasswordConfirmationTokenHandler == nil {
+		unregistered = append(unregistered, "login.GetResetPasswordConfirmationTokenHandler")
+	}
+
+	if o.LoginGetResetPasswordRequestEmailHandler == nil {
+		unregistered = append(unregistered, "login.GetResetPasswordRequestEmailHandler")
+	}
+
 	if o.LoginPostLoginHandler == nil {
 		unregistered = append(unregistered, "login.PostLoginHandler")
 	}
@@ -160,6 +177,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.RegisterPostRegisterDetailsHandler == nil {
 		unregistered = append(unregistered, "register.PostRegisterDetailsHandler")
+	}
+
+	if o.LoginPostResetPasswordHandler == nil {
+		unregistered = append(unregistered, "login.PostResetPasswordHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -265,6 +286,16 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	}
 	o.handlers["GET"]["/register-confirmation/{token}"] = register.NewGetRegisterConfirmationToken(o.context, o.RegisterGetRegisterConfirmationTokenHandler)
 
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/reset-password-confirmation/{token}"] = login.NewGetResetPasswordConfirmationToken(o.context, o.LoginGetResetPasswordConfirmationTokenHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/reset-password-request/{email}"] = login.NewGetResetPasswordRequestEmail(o.context, o.LoginGetResetPasswordRequestEmailHandler)
+
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
@@ -279,6 +310,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/register-details"] = register.NewPostRegisterDetails(o.context, o.RegisterPostRegisterDetailsHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/reset-password"] = login.NewPostResetPassword(o.context, o.LoginPostResetPasswordHandler)
 
 }
 

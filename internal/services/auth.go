@@ -28,12 +28,12 @@ type Credentials struct {
 }
 
 // CreateJWT Function
-func CreateJWT(params *register.PostRegisterParams) (string, error) {
-	logger.Log.Info(params.RegisterRequest.Email.(string))
+func CreateJWT(email string) (string, error) {
+	logger.Log.Info(email)
 
 	expirationTime := time.Now().Add(10 * time.Minute)
 	claims := &Claims{
-		Email: params.RegisterRequest.Email.(string),
+		Email: email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
