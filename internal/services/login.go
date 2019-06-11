@@ -47,6 +47,7 @@ func HandleLogin(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 		})
 	}
 	if user.Password != params.LoginRequest.Password.(string) {
+		logger.Log.Info("Incorrect password..")
 		return login.NewPostLoginUnauthorized().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
@@ -77,7 +78,6 @@ func HandleLogin(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 			Message: "Something went wrong. Please try again.",
 		})
 	}
-
 	logger.Log.Info(tokenString)
 
 	return login.NewPostLoginOK().WithPayload(&models.LoginResponse{

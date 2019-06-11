@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/Prashanth-GS/test-swagger/internal/database"
 	"github.com/Prashanth-GS/test-swagger/internal/helpers"
@@ -121,8 +122,30 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 
 // HandleRegisterDetails Function
 func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams) middleware.Responder {
-	if params.RegisterRequest.Email == nil || params.RegisterRequest.Email == "" ||
-		params.RegisterRequest.Organization == nil || params.RegisterRequest.Organization == "" ||
+	authHeader := params.HTTPRequest.Header.Get("Authorization")
+	logger.Log.Info(authHeader)
+	claims, err := ValidateJWT(strings.Split(authHeader, " ")[1])
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return register.NewPostRegisterDetailsUnauthorized().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    401,
+					Message: "Token is Invalid",
+				},
+				Message: "Unauthorized, Please reregister to continue..",
+			})
+		}
+		return register.NewPostRegisterDetailsBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Token validation produced an error",
+			},
+			Message: "Bad Request, Please reregister to continue..",
+		})
+	}
+	if params.RegisterRequest.Organization == nil || params.RegisterRequest.Organization == "" ||
 		params.RegisterRequest.Designation == nil || params.RegisterRequest.Designation == "" ||
 		params.RegisterRequest.EmployeeCount == nil || params.RegisterRequest.EmployeeCount == "" {
 		logger.Log.Error("BadRequest - Invalid parameters..")
@@ -135,16 +158,15 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 			Message: "Invalid parameters",
 		})
 	}
-	logger.Log.Info("Register Details called with parameters: " + params.RegisterRequest.Email.(string) +
-		" " + params.RegisterRequest.Organization.(string) + " " + params.RegisterRequest.Designation.(string) +
-		" " + string(params.RegisterRequest.EmployeeCount.(json.Number)))
+	logger.Log.Info("Register Details called with parameters: " + params.RegisterRequest.Organization.(string) +
+		" " + params.RegisterRequest.Designation.(string) + " " + string(params.RegisterRequest.EmployeeCount.(json.Number)))
 
 	// Save the user to the database..
 	empCount, err := params.RegisterRequest.EmployeeCount.(json.Number).Int64()
 	if err != nil {
 		logger.Log.Error(err.Error())
 	}
-	user, err := database.SelectOneUser(db, params.RegisterRequest.Email.(string))
+	user, err := database.SelectOneUser(db, claims.Email)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err != nil {
