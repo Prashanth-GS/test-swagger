@@ -63,6 +63,8 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 		os.Exit(1)
 	}
 	database.CreateUserAuthSchema(db)
+
+	services.InitializeOAuthGoogle()
 	// Manual Configurations and setup here..
 
 	api.JSONConsumer = runtime.JSONConsumer()
@@ -102,6 +104,11 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	if api.LoginGetResetPasswordConfirmationTokenHandler == nil {
 		api.LoginGetResetPasswordConfirmationTokenHandler = login.GetResetPasswordConfirmationTokenHandlerFunc(func(params login.GetResetPasswordConfirmationTokenParams) middleware.Responder {
 			return services.HandleResetPasswordConfirmation(&params)
+		})
+	}
+	if api.RegisterGetCallbackGoogleHandler == nil {
+		api.RegisterGetCallbackGoogleHandler = register.GetCallbackGoogleHandlerFunc(func(params register.GetCallbackGoogleParams) middleware.Responder {
+			return services.CallBackFromGoogle(params.HTTPRequest)
 		})
 	}
 

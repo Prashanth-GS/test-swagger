@@ -47,6 +47,7 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		RegisterPostRegisterHandler:                   nil,
 		RegisterPostRegisterDetailsHandler:            nil,
 		LoginPostResetPasswordHandler:                 nil,
+		RegisterGetCallbackGoogleHandler:              nil,
 	}
 }
 
@@ -78,6 +79,8 @@ type AuthServiceAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
+	// RegisterGetCallbackGoogleHandler sets the operation handler for the get callback google operation
+	RegisterGetCallbackGoogleHandler register.GetCallbackGoogleHandler
 	// RegisterGetRegisterConfirmationTokenHandler sets the operation handler for the get register confirmation token operation
 	RegisterGetRegisterConfirmationTokenHandler register.GetRegisterConfirmationTokenHandler
 	// LoginGetResetPasswordConfirmationTokenHandler sets the operation handler for the get reset password confirmation token operation
@@ -153,6 +156,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
+	}
+
+	if o.RegisterGetCallbackGoogleHandler == nil {
+		unregistered = append(unregistered, "register.GetCallbackGoogleHandler")
 	}
 
 	if o.RegisterGetRegisterConfirmationTokenHandler == nil {
@@ -280,6 +287,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/callback-google"] = register.NewGetCallbackGoogle(o.context, o.RegisterGetCallbackGoogleHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

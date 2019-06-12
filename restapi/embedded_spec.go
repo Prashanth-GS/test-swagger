@@ -38,6 +38,9 @@ func init() {
   },
   "basePath": "/news-api/v1",
   "paths": {
+    "/callback-google": {
+      "$ref": "./paths/callbackGoogle.yml"
+    },
     "/login": {
       "$ref": "./paths/login.yml"
     },
@@ -90,6 +93,51 @@ func init() {
   },
   "basePath": "/news-api/v1",
   "paths": {
+    "/callback-google": {
+      "get": {
+        "tags": [
+          "register"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [

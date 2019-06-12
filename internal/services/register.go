@@ -38,8 +38,8 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 
 	logger.Log.Info(params.RegisterRequest.Type)
 	switch params.RegisterRequest.Type {
-	// case "gl":
-	// 	return HandleGoogleRegister(params.HTTPRequest)
+	case "gl":
+		return HandleGoogleRegister(params.HTTPRequest)
 	default:
 		return registerOPUser(db, params)
 	}

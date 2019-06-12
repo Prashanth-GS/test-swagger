@@ -1,11 +1,17 @@
 package services
 
 import (
+	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/Prashanth-GS/test-swagger/internal/logger"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/spf13/viper"
+	"golang.org/x/oauth2"
 )
 
 // JWTKey from Config/environment
@@ -59,4 +65,29 @@ func ValidateJWT(tknStr string) (*Claims, error) {
 		return claims, err
 	}
 	return claims, nil
+}
+
+/*
+HandleOAuth Function
+*/
+func HandleOAuth(r *http.Request, oauthConf *oauth2.Config, oauthStateString string) middleware.Responder {
+	URL, err := url.Parse(oauthConf.Endpoint.AuthURL)
+	if err != nil {
+		logger.Log.Error("Parse: " + err.Error())
+	}
+	logger.Log.Info(URL.String())
+	parameters := url.Values{}
+	parameters.Add("client_id", oauthConf.ClientID)
+	parameters.Add("scope", strings.Join(oauthConf.Scopes, " "))
+	parameters.Add("redirect_uri", oauthConf.RedirectURL)
+	parameters.Add("response_type", "code")
+	parameters.Add("state", oauthStateString)
+	URL.RawQuery = parameters.Encode()
+	url := URL.String()
+	logger.Log.Info(url)
+
+	return middleware.ResponderFunc(
+		func(w http.ResponseWriter, pr runtime.Producer) {
+			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		})
 }

@@ -22,5 +22,6 @@ require (
 	github.com/spf13/viper v1.4.0
 	go.uber.org/zap v1.10.0
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
+	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
 	mellium.im/sasl v0.2.1 // indirect
 )
