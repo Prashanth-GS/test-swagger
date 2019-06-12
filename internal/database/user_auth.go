@@ -17,6 +17,7 @@ type UserAuth struct {
 	EmployeeCount        int
 	Designation          string
 	ConfirmationAccepted bool `sql:"default: false"`
+	ConfirmationExpired  bool `sql:"default: false"`
 	DetailsRegistered    bool `sql:"default: false"`
 }
 
