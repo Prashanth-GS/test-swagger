@@ -90,6 +90,14 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	empCount, err := params.RegisterRequest.EmployeeCount.(json.Number).Int64()
 	if err != nil {
 		logger.Log.Error(err.Error())
+		return register.NewPostRegisterDetailsBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Bad Request, expected an integer as Employee Count, but got something else",
+			},
+			Message: "BadRequest, Please enter a number for Employee Count field.",
+		})
 	}
 	user, err := database.SelectOneUser(db, claims.Email)
 	if err != nil {
@@ -346,7 +354,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 		helpers.RegiserConfEmailSubject,
 		to,
 		helpers.RegiserConfEmailContent,
-		helpers.GetRegisterConfTemplate("http://localhost:9090/news-api/v1/register-confirmation/"+jwtToken),
+		helpers.GetRegisterConfTemplate("http://localhost:3000/selections/"+jwtToken),
 	)
 	client := sendgrid.NewSendClient(viper.GetString("sendgrid-apikey"))
 	_, err = client.Send(message)
