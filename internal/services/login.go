@@ -1,6 +1,7 @@
 package services
 
 import (
+	"strings"
 	"time"
 
 	"github.com/Prashanth-GS/test-swagger/internal/database"
@@ -57,7 +58,7 @@ func HandleLogin(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 			Message: "Incorrect Password",
 		})
 	}
-	expirationTime := time.Now().Add(1 * time.Minute)
+	expirationTime := time.Now().Add(10 * time.Minute)
 	claims := &Claims{
 		Email: params.LoginRequest.Email.(string),
 		StandardClaims: jwt.StandardClaims{
@@ -252,6 +253,88 @@ func HandleResetPasswordConfirmation(params *login.GetResetPasswordConfirmationT
 		Data: &models.UserEmailResponseData{
 			Email:   claims.Email,
 			Message: "Reset Password confirmation successful, proceed to password reset.",
+		},
+	})
+}
+
+// HandleRefreshJWT Function
+func HandleRefreshJWT(params *login.GetRefreshTokenParams) middleware.Responder {
+	authHeader := params.HTTPRequest.Header.Get("Authorization")
+	tknStr := strings.Split(authHeader, " ")[1]
+	logger.Log.Info(tknStr)
+
+	claims := &Claims{}
+	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return JWTKey, nil
+	})
+	if tkn.Valid {
+		return login.NewGetRefreshTokenBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Token is still valid",
+			},
+			Message: "Bad Request, The token is still valid..",
+		})
+	}
+	logger.Log.Error("Unauthorized.. Trying to Refresh Token..")
+	if err != nil && !strings.Contains(err.Error(), "token is expired") {
+		logger.Log.Error(err.Error())
+		if err == jwt.ErrSignatureInvalid {
+			return login.NewGetRefreshTokenUnauthorized().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    401,
+					Message: "Token is Invalid",
+				},
+				Message: "Unauthorized, Please login again to continue..",
+			})
+		}
+		return login.NewGetRefreshTokenBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Token validation produced an error",
+			},
+			Message: "Bad Request, Please login again to continue..",
+		})
+	}
+
+	// if (CURRENT TIME - EXPIRATION TIME) is GREATER THAN the ACCEPTED DURATION ==> Consider as a BAD REQUEST
+	if time.Now().Sub(time.Unix(claims.ExpiresAt, 0)) > 5*time.Minute {
+		logger.Log.Info("Expired, and delay is MORE than expected..")
+		return login.NewGetRefreshTokenForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "Expired time is more than expected",
+			},
+			Message: "Forbidden, Please login again to continue..",
+		})
+	}
+	logger.Log.Info("Expired, but delay is LESS than expected..")
+
+	expirationTime := time.Now().Add(10 * time.Minute)
+	claims.ExpiresAt = expirationTime.Unix()
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(JWTKey)
+	if err != nil {
+		return login.NewGetRefreshTokenInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "Token generation produced an error",
+			},
+			Message: "Something went wrong, please try again later..",
+		})
+	}
+
+	return login.NewGetRefreshTokenOK().WithPayload(&models.LoginResponse{
+		Success: true,
+		Error:   nil,
+		Data: &models.LoginResponseData{
+			AccessToken: tokenString,
+			ExpiresIn:   expirationTime,
 		},
 	})
 }

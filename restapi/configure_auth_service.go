@@ -106,10 +106,14 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.HandleResetPasswordConfirmation(&params)
 		})
 	}
-
 	if api.NewsGetNewsHandler == nil {
 		api.NewsGetNewsHandler = news.GetNewsHandlerFunc(func(params news.GetNewsParams) middleware.Responder {
 			return services.HandleGetAllNews(db, &params)
+		})
+	}
+	if api.LoginGetRefreshTokenHandler == nil {
+		api.LoginGetRefreshTokenHandler = login.GetRefreshTokenHandlerFunc(func(params login.GetRefreshTokenParams) middleware.Responder {
+			return services.HandleRefreshJWT(&params)
 		})
 	}
 
