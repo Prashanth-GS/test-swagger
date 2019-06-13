@@ -26,6 +26,8 @@ paths:
     $ref: ./paths/resetPassword.yml
   /reset-password-confirmation/{token}:
     $ref: ./paths/resetPasswordConf.yml
+  /news:
+    $ref: ./paths/news.yml
 definitions:
   generalResponse:
     $ref: ./definitions/generalResponse.yml

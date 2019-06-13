@@ -20,6 +20,7 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 )
 
@@ -40,13 +41,30 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		RegisterGetRegisterConfirmationTokenHandler:   nil,
-		LoginGetResetPasswordConfirmationTokenHandler: nil,
-		LoginGetResetPasswordRequestEmailHandler:      nil,
-		LoginPostLoginHandler:                         nil,
-		RegisterPostRegisterHandler:                   nil,
-		RegisterPostRegisterDetailsHandler:            nil,
-		LoginPostResetPasswordHandler:                 nil,
+		NewsGetNewsHandler: news.GetNewsHandlerFunc(func(params news.GetNewsParams) middleware.Responder {
+			return middleware.NotImplemented("operation NewsGetNews has not yet been implemented")
+		}),
+		RegisterGetRegisterConfirmationTokenHandler: register.GetRegisterConfirmationTokenHandlerFunc(func(params register.GetRegisterConfirmationTokenParams) middleware.Responder {
+			return middleware.NotImplemented("operation RegisterGetRegisterConfirmationToken has not yet been implemented")
+		}),
+		LoginGetResetPasswordConfirmationTokenHandler: login.GetResetPasswordConfirmationTokenHandlerFunc(func(params login.GetResetPasswordConfirmationTokenParams) middleware.Responder {
+			return middleware.NotImplemented("operation LoginGetResetPasswordConfirmationToken has not yet been implemented")
+		}),
+		LoginGetResetPasswordRequestEmailHandler: login.GetResetPasswordRequestEmailHandlerFunc(func(params login.GetResetPasswordRequestEmailParams) middleware.Responder {
+			return middleware.NotImplemented("operation LoginGetResetPasswordRequestEmail has not yet been implemented")
+		}),
+		LoginPostLoginHandler: login.PostLoginHandlerFunc(func(params login.PostLoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation LoginPostLogin has not yet been implemented")
+		}),
+		RegisterPostRegisterHandler: register.PostRegisterHandlerFunc(func(params register.PostRegisterParams) middleware.Responder {
+			return middleware.NotImplemented("operation RegisterPostRegister has not yet been implemented")
+		}),
+		RegisterPostRegisterDetailsHandler: register.PostRegisterDetailsHandlerFunc(func(params register.PostRegisterDetailsParams) middleware.Responder {
+			return middleware.NotImplemented("operation RegisterPostRegisterDetails has not yet been implemented")
+		}),
+		LoginPostResetPasswordHandler: login.PostResetPasswordHandlerFunc(func(params login.PostResetPasswordParams) middleware.Responder {
+			return middleware.NotImplemented("operation LoginPostResetPassword has not yet been implemented")
+		}),
 	}
 }
 
@@ -78,6 +96,8 @@ type AuthServiceAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
+	// NewsGetNewsHandler sets the operation handler for the get news operation
+	NewsGetNewsHandler news.GetNewsHandler
 	// RegisterGetRegisterConfirmationTokenHandler sets the operation handler for the get register confirmation token operation
 	RegisterGetRegisterConfirmationTokenHandler register.GetRegisterConfirmationTokenHandler
 	// LoginGetResetPasswordConfirmationTokenHandler sets the operation handler for the get reset password confirmation token operation
@@ -153,6 +173,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
+	}
+
+	if o.NewsGetNewsHandler == nil {
+		unregistered = append(unregistered, "news.GetNewsHandler")
 	}
 
 	if o.RegisterGetRegisterConfirmationTokenHandler == nil {
@@ -280,6 +304,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/news"] = news.NewGetNews(o.context, o.NewsGetNewsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

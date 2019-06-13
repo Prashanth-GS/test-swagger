@@ -41,6 +41,9 @@ func init() {
     "/login": {
       "$ref": "./paths/login.yml"
     },
+    "/news": {
+      "$ref": "./paths/news.yml"
+    },
     "/register": {
       "$ref": "./paths/register.yml"
     },
@@ -109,6 +112,51 @@ func init() {
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/loginResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
+    "/news": {
+      "get": {
+        "tags": [
+          "news"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/allNewsResponse"
             }
           },
           "400": {
@@ -467,6 +515,43 @@ func init() {
     }
   },
   "definitions": {
+    "allNewsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "description": "string"
+              },
+              "headline": {
+                "headline": "string"
+              },
+              "imageUrl": {
+                "imageUrl": "string"
+              }
+            }
+          },
+          "name": "news-list"
+        },
+        "error": {
+          "properties": {
+            "code": {
+              "code": "int"
+            },
+            "message": {
+              "message": "string"
+            }
+          },
+          "error": "object"
+        },
+        "success": {
+          "success": "boolean"
+        }
+      }
+    },
     "generalResponse": {
       "type": "object",
       "properties": {

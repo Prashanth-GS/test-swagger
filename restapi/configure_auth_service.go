@@ -22,6 +22,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/internal/services"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 )
 
@@ -62,7 +63,8 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	database.CreateUserAuthSchema(db)
+	database.CreateUserAuthRelation(db)
+	database.CreateNewsRelation(db)
 	// Manual Configurations and setup here..
 
 	api.JSONConsumer = runtime.JSONConsumer()
@@ -102,6 +104,12 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	if api.LoginGetResetPasswordConfirmationTokenHandler == nil {
 		api.LoginGetResetPasswordConfirmationTokenHandler = login.GetResetPasswordConfirmationTokenHandlerFunc(func(params login.GetResetPasswordConfirmationTokenParams) middleware.Responder {
 			return services.HandleResetPasswordConfirmation(&params)
+		})
+	}
+
+	if api.NewsGetNewsHandler == nil {
+		api.NewsGetNewsHandler = news.GetNewsHandlerFunc(func(params news.GetNewsParams) middleware.Responder {
+			return services.HandleGetAllNews(db, &params)
 		})
 	}
 

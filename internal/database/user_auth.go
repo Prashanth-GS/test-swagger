@@ -21,8 +21,8 @@ type UserAuth struct {
 	DetailsRegistered    bool `sql:"default: false"`
 }
 
-// CreateUserAuthSchema Function
-func CreateUserAuthSchema(db *pg.DB) error {
+// CreateUserAuthRelation Function
+func CreateUserAuthRelation(db *pg.DB) error {
 	tables := []interface{}{(*UserAuth)(nil)}
 	for _, model := range tables {
 		err := db.CreateTable(model, &orm.CreateTableOptions{
