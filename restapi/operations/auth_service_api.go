@@ -47,6 +47,7 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		RegisterPostRegisterHandler:                   nil,
 		RegisterPostRegisterDetailsHandler:            nil,
 		LoginPostResetPasswordHandler:                 nil,
+		LoginGetRefreshTokenHandler:                   nil,
 	}
 }
 
@@ -78,6 +79,8 @@ type AuthServiceAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
+	// LoginGetRefreshTokenHandler sets the operation handler for the get refresh token operation
+	LoginGetRefreshTokenHandler login.GetRefreshTokenHandler
 	// RegisterGetRegisterConfirmationTokenHandler sets the operation handler for the get register confirmation token operation
 	RegisterGetRegisterConfirmationTokenHandler register.GetRegisterConfirmationTokenHandler
 	// LoginGetResetPasswordConfirmationTokenHandler sets the operation handler for the get reset password confirmation token operation
@@ -153,6 +156,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
+	}
+
+	if o.LoginGetRefreshTokenHandler == nil {
+		unregistered = append(unregistered, "login.GetRefreshTokenHandler")
 	}
 
 	if o.RegisterGetRegisterConfirmationTokenHandler == nil {
@@ -280,6 +287,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/refresh-token"] = login.NewGetRefreshToken(o.context, o.LoginGetRefreshTokenHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
