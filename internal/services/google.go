@@ -57,7 +57,7 @@ func HandleGoogleLogin(r *http.Request) middleware.Responder {
 /*
 CallBackFromGoogle Function
 */
-func CallBackFromGoogle(db *pg.DB, r *http.Request) middleware.Responder {
+func CallBackFromGoogle(action string, db *pg.DB, r *http.Request) middleware.Responder {
 	logger.Log.Info("Callback-gl..")
 
 	state := r.FormValue("state")
@@ -146,5 +146,10 @@ func CallBackFromGoogle(db *pg.DB, r *http.Request) middleware.Responder {
 	json.Unmarshal(response, &userCred)
 	logger.Log.Info(userCred.Email + " " + userCred.ID)
 
-	return registerOAuthUser(db, &userCred)
+	if action == "register" {
+		logger.Log.Info("Attempting to register user..")
+		return registerOAuthUser(db, &userCred)
+	}
+	logger.Log.Info("Attempting to login user..")
+	return loginOAuthUser(db, &userCred)
 }

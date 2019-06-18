@@ -16,6 +16,8 @@ paths:
     $ref: ./paths/register.yml
   /callback-google:
     $ref: ./paths/callbackGoogle.yml
+  /callback-google-login:
+    $ref: ./paths/callbackGoogleLogin.yml
   /register-confirmation/{token}:
     $ref: ./paths/registerConfirmation.yml
   /register-details:

@@ -108,7 +108,12 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	}
 	if api.RegisterGetCallbackGoogleHandler == nil {
 		api.RegisterGetCallbackGoogleHandler = register.GetCallbackGoogleHandlerFunc(func(params register.GetCallbackGoogleParams) middleware.Responder {
-			return services.CallBackFromGoogle(db, params.HTTPRequest)
+			return services.CallBackFromGoogle("register", db, params.HTTPRequest)
+		})
+	}
+	if api.LoginGetCallbackGoogleLoginHandler == nil {
+		api.LoginGetCallbackGoogleLoginHandler = login.GetCallbackGoogleLoginHandlerFunc(func(params login.GetCallbackGoogleLoginParams) middleware.Responder {
+			return services.CallBackFromGoogle("login", db, params.HTTPRequest)
 		})
 	}
 

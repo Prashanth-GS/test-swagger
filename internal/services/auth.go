@@ -19,6 +19,8 @@ import (
 // Create the JWT key used to create the signature
 var JWTKey = []byte(viper.GetString("jwt-secret"))
 
+var expTime time.Duration = 10
+
 // Claims Struct
 type Claims struct {
 	Email string `json:"email"`
@@ -37,10 +39,10 @@ type oauthResponse struct {
 }
 
 // CreateJWT Function
-func CreateJWT(email string) (string, error) {
+func CreateJWT(email string, expTime time.Duration) (string, error) {
 	logger.Log.Info(email)
 
-	expirationTime := time.Now().Add(10 * time.Minute)
+	expirationTime := time.Now().Add(expTime * time.Minute)
 	claims := &Claims{
 		Email: email,
 		StandardClaims: jwt.StandardClaims{

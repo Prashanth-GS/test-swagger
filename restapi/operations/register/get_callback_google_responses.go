@@ -25,7 +25,7 @@ type GetCallbackGoogleOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.GeneralResponse `json:"body,omitempty"`
+	Payload *models.LoginResponse `json:"body,omitempty"`
 }
 
 // NewGetCallbackGoogleOK creates GetCallbackGoogleOK with default headers values
@@ -35,13 +35,13 @@ func NewGetCallbackGoogleOK() *GetCallbackGoogleOK {
 }
 
 // WithPayload adds the payload to the get callback google o k response
-func (o *GetCallbackGoogleOK) WithPayload(payload *models.GeneralResponse) *GetCallbackGoogleOK {
+func (o *GetCallbackGoogleOK) WithPayload(payload *models.LoginResponse) *GetCallbackGoogleOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get callback google o k response
-func (o *GetCallbackGoogleOK) SetPayload(payload *models.GeneralResponse) {
+func (o *GetCallbackGoogleOK) SetPayload(payload *models.LoginResponse) {
 	o.Payload = payload
 }
 

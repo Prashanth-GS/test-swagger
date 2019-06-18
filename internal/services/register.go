@@ -346,7 +346,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 
 	// Send Email to the user..
 	to := mail.NewEmail("GSOP Support", params.RegisterRequest.Email.(string))
-	jwtToken, err := CreateJWT(params.RegisterRequest.Email.(string))
+	jwtToken, err := CreateJWT(params.RegisterRequest.Email.(string), expTime)
 	if err != nil {
 		logger.Log.Error(err.Error())
 	}
@@ -419,7 +419,7 @@ func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder
 	}
 	logger.Log.Info("User added to database..")
 
-	token, err := CreateJWT(userCreds.Email)
+	token, err := CreateJWT(userCreds.Email, expTime)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
@@ -432,9 +432,12 @@ func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder
 		})
 	}
 
-	return register.NewPostRegisterOK().WithPayload(&models.GeneralResponse{
+	return register.NewGetCallbackGoogleOK().WithPayload(&models.LoginResponse{
 		Success: true,
 		Error:   nil,
-		Message: token,
+		Data: &models.LoginResponseData{
+			AccessToken: token,
+			ExpiresIn:   "5 mins",
+		},
 	})
 }

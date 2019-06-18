@@ -18,76 +18,24 @@ import (
 
 // HandleLogin Function
 func HandleLogin(db *pg.DB, params *login.PostLoginParams) middleware.Responder {
-	logger.Log.Info("Login called with parameters: " + params.LoginRequest.Type +
-		" " + params.LoginRequest.Email.(string) + " " + params.LoginRequest.Password.(string))
-
-	user, err := database.SelectOneUser(db, params.LoginRequest.Email.(string))
-	if err != nil {
-		logger.Log.Error(err.Error())
-		if err == pg.ErrNoRows {
-			return login.NewPostLoginNotFound().WithPayload(&models.GeneralResponse{
-				Success: false,
-				Error: &models.GeneralResponseError{
-					Code:    404,
-					Message: "Given email is not found in the database",
-				},
-				Message: "Email is not registered, please register before logging in",
-			})
-		}
-	}
-	if !user.DetailsRegistered {
-		logger.Log.Info("User has not completed Registration - User is available in the database, but he has not completed detailed registration..")
-		return login.NewPostLoginForbidden().WithPayload(&models.GeneralResponse{
+	if params.LoginRequest.Type == "" {
+		return login.NewPostLoginBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
-				Code:    403,
-				Message: "User has not completed Registration - User is available in the database, but he has not completed detailed registration",
+				Code:    400,
+				Message: "Invalid Parameters",
 			},
-			Message: "Please complete organization registration and then, continue to Login.",
+			Message: "Invalid parameters",
 		})
 	}
-	if user.Password != params.LoginRequest.Password.(string) {
-		logger.Log.Info("Incorrect password..")
-		return login.NewPostLoginUnauthorized().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    401,
-				Message: "Incorrect Password",
-			},
-			Message: "Incorrect Password",
-		})
-	}
-	expirationTime := time.Now().Add(1 * time.Minute)
-	claims := &Claims{
-		Email: params.LoginRequest.Email.(string),
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
+	logger.Log.Info(params.LoginRequest.Type)
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(JWTKey)
-	if err != nil {
-		logger.Log.Error(err.Error())
-		return login.NewPostLoginInternalServerError().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    500,
-				Message: "Something went wrong. Please try again.",
-			},
-			Message: "Something went wrong. Please try again.",
-		})
+	switch params.LoginRequest.Type {
+	case "gl":
+		return HandleGoogleLogin(params.HTTPRequest)
+	default:
+		return loginOPUser(db, params)
 	}
-	logger.Log.Info(tokenString)
-
-	return login.NewPostLoginOK().WithPayload(&models.LoginResponse{
-		Success: true,
-		Error:   nil,
-		Data: &models.LoginResponseData{
-			AccessToken: tokenString,
-			ExpiresIn:   expirationTime.String(),
-		},
-	})
 }
 
 // HandleResetPasswordRequest Function
@@ -120,7 +68,7 @@ func HandleResetPasswordRequest(db *pg.DB, params *login.GetResetPasswordRequest
 		})
 	}
 
-	jwtToken, err := CreateJWT(params.Email)
+	jwtToken, err := CreateJWT(params.Email, expTime)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return login.NewGetResetPasswordRequestEmailInternalServerError().WithPayload(&models.GeneralResponse{
@@ -252,6 +200,125 @@ func HandleResetPasswordConfirmation(params *login.GetResetPasswordConfirmationT
 		Data: &models.UserEmailResponseData{
 			Email:   claims.Email,
 			Message: "Reset Password confirmation successful, proceed to password reset.",
+		},
+	})
+}
+
+func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder {
+	user, err := database.SelectOneUser(db, params.LoginRequest.Email.(string))
+	if err != nil {
+		logger.Log.Error(err.Error())
+		if err == pg.ErrNoRows {
+			return login.NewPostLoginNotFound().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    404,
+					Message: "Given email is not found in the database",
+				},
+				Message: "Email is not registered, please register before logging in",
+			})
+		}
+	}
+	if !user.DetailsRegistered {
+		logger.Log.Info("User has not completed Registration - User is available in the database, but he has not completed detailed registration..")
+		return login.NewPostLoginForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "User has not completed Registration - User is available in the database, but he has not completed detailed registration",
+			},
+			Message: "Please complete organization registration and then, continue to Login.",
+		})
+	}
+	if user.Password != params.LoginRequest.Password.(string) {
+		logger.Log.Info("Incorrect password..")
+		return login.NewPostLoginUnauthorized().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    401,
+				Message: "Incorrect Password",
+			},
+			Message: "Incorrect Password",
+		})
+	}
+	expirationTime := time.Now().Add(1 * time.Minute)
+	claims := &Claims{
+		Email: params.LoginRequest.Email.(string),
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(JWTKey)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return login.NewPostLoginInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "Something went wrong. Please try again.",
+			},
+			Message: "Something went wrong. Please try again.",
+		})
+	}
+	logger.Log.Info(tokenString)
+
+	return login.NewPostLoginOK().WithPayload(&models.LoginResponse{
+		Success: true,
+		Error:   nil,
+		Data: &models.LoginResponseData{
+			AccessToken: tokenString,
+			ExpiresIn:   expirationTime.String(),
+		},
+	})
+}
+
+func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
+	user, err := database.SelectOneUser(db, userCreds.Email)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		if err == pg.ErrNoRows {
+			return login.NewGetCallbackGoogleLoginNotFound().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    404,
+					Message: "Given email is not found in the database",
+				},
+				Message: "Email is not registered, please register before logging in",
+			})
+		}
+	}
+	if !user.DetailsRegistered {
+		logger.Log.Info("User has not completed Registration - User is available in the database, but he has not completed detailed registration..")
+		return login.NewGetCallbackGoogleLoginForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "User has not completed Registration - User is available in the database, but he has not completed detailed registration",
+			},
+			Message: "Please complete organization registration and then, continue to Login.",
+		})
+	}
+	token, err := CreateJWT(userCreds.Email, expTime)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return login.NewGetCallbackGoogleLoginInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "An error occured when trying to create access token.",
+			},
+			Message: "Internal Server Error, please try again later.",
+		})
+	}
+
+	return login.NewGetCallbackGoogleLoginOK().WithPayload(&models.LoginResponse{
+		Success: true,
+		Error:   nil,
+		Data: &models.LoginResponseData{
+			AccessToken: token,
+			ExpiresIn:   "10 mins",
 		},
 	})
 }
