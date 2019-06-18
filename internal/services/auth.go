@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/Prashanth-GS/test-swagger/internal/logger"
+	"github.com/Prashanth-GS/test-swagger/models"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
@@ -86,8 +87,9 @@ func HandleOAuth(r *http.Request, oauthConf *oauth2.Config, oauthStateString str
 	url := URL.String()
 	logger.Log.Info(url)
 
-	return middleware.ResponderFunc(
-		func(w http.ResponseWriter, pr runtime.Producer) {
-			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-		})
+	return register.NewPostRegisterOK().WithPayload(&models.GeneralResponse{
+		Success: true,
+		Error:   nil,
+		Message: url,
+	})
 }
