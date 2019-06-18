@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/models"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-pg/pg"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -18,11 +20,13 @@ var (
 	oauthConfGl = &oauth2.Config{
 		ClientID:     "",
 		ClientSecret: "",
-		RedirectURL:  "http://localhost:9090/news-api/v1/callback-google",
+		RedirectURL:  "",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}
-	oauthStateStringGl = ""
+	oauthStateStringGl  = ""
+	registerRedirectURL = "http://localhost:9090/news-api/v1/callback-google"
+	loginRedirectURL    = "http://localhost:9090/news-api/v1/callback-google-login"
 )
 
 /*
@@ -38,6 +42,7 @@ func InitializeOAuthGoogle() {
 HandleGoogleRegister Function
 */
 func HandleGoogleRegister(r *http.Request) middleware.Responder {
+	oauthConfGl.RedirectURL = registerRedirectURL
 	return HandleOAuth(r, oauthConfGl, oauthStateStringGl)
 }
 
@@ -45,13 +50,14 @@ func HandleGoogleRegister(r *http.Request) middleware.Responder {
 HandleGoogleLogin Function
 */
 func HandleGoogleLogin(r *http.Request) middleware.Responder {
+	oauthConfGl.RedirectURL = loginRedirectURL
 	return HandleOAuth(r, oauthConfGl, oauthStateStringGl)
 }
 
 /*
 CallBackFromGoogle Function
 */
-func CallBackFromGoogle(r *http.Request) middleware.Responder {
+func CallBackFromGoogle(db *pg.DB, r *http.Request) middleware.Responder {
 	logger.Log.Info("Callback-gl..")
 
 	state := r.FormValue("state")
@@ -92,54 +98,53 @@ func CallBackFromGoogle(r *http.Request) middleware.Responder {
 			},
 			Message: "Something went wrong please try again later.",
 		})
-	} else {
-		token, err := oauthConfGl.Exchange(oauth2.NoContext, code)
-		if err != nil {
-			logger.Log.Error("oauthConfGl.Exchange() failed with " + err.Error() + "\n")
-			return register.NewGetCallbackGoogleInternalServerError().WithPayload(&models.GeneralResponse{
-				Success: false,
-				Error: &models.GeneralResponseError{
-					Code:    500,
-					Message: "toekn exchange failed",
-				},
-				Message: "Something went wrong please try again later.",
-			})
-		}
-		logger.Log.Info("TOKEN>> AccessToken>> " + token.AccessToken)
-		logger.Log.Info("TOKEN>> Expiration Time>> " + token.Expiry.String())
-
-		resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(token.AccessToken))
-		if err != nil {
-			logger.Log.Error("Get: " + err.Error() + "\n")
-			return register.NewGetCallbackGoogleInternalServerError().WithPayload(&models.GeneralResponse{
-				Success: false,
-				Error: &models.GeneralResponseError{
-					Code:    500,
-					Message: "toekn exchange failed",
-				},
-				Message: "Something went wrong please try again later.",
-			})
-		}
-		defer resp.Body.Close()
-
-		response, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			logger.Log.Error("ReadAll: " + err.Error() + "\n")
-			return register.NewGetCallbackGoogleInternalServerError().WithPayload(&models.GeneralResponse{
-				Success: false,
-				Error: &models.GeneralResponseError{
-					Code:    500,
-					Message: "toekn exchange failed",
-				},
-				Message: "Something went wrong please try again later.",
-			})
-		}
-
-		logger.Log.Info("parseResponseBody: " + string(response) + "\n")
-		return register.NewGetCallbackGoogleOK().WithPayload(&models.GeneralResponse{
-			Success: true,
-			Error:   nil,
-			Message: string(response),
+	}
+	token, err := oauthConfGl.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		logger.Log.Error("oauthConfGl.Exchange() failed with " + err.Error() + "\n")
+		return register.NewGetCallbackGoogleInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "toekn exchange failed",
+			},
+			Message: "Something went wrong please try again later.",
 		})
 	}
+	logger.Log.Info("TOKEN>> AccessToken>> " + token.AccessToken)
+	logger.Log.Info("TOKEN>> Expiration Time>> " + token.Expiry.String())
+
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(token.AccessToken))
+	if err != nil {
+		logger.Log.Error("Get: " + err.Error() + "\n")
+		return register.NewGetCallbackGoogleInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "toekn exchange failed",
+			},
+			Message: "Something went wrong please try again later.",
+		})
+	}
+	defer resp.Body.Close()
+
+	response, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Log.Error("ReadAll: " + err.Error() + "\n")
+		return register.NewGetCallbackGoogleInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: "toekn exchange failed",
+			},
+			Message: "Something went wrong please try again later.",
+		})
+	}
+	logger.Log.Info("parseResponseBody: " + string(response) + "\n")
+
+	userCred := oauthResponse{}
+	json.Unmarshal(response, &userCred)
+	logger.Log.Info(userCred.Email + " " + userCred.ID)
+
+	return registerOAuthUser(db, &userCred)
 }

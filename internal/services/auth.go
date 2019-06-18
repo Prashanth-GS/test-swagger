@@ -31,6 +31,11 @@ type Credentials struct {
 	Username string `json:"username"`
 }
 
+type oauthResponse struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+}
+
 // CreateJWT Function
 func CreateJWT(email string) (string, error) {
 	logger.Log.Info(email)

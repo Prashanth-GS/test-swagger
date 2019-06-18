@@ -108,7 +108,7 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	}
 	if api.RegisterGetCallbackGoogleHandler == nil {
 		api.RegisterGetCallbackGoogleHandler = register.GetCallbackGoogleHandlerFunc(func(params register.GetCallbackGoogleParams) middleware.Responder {
-			return services.CallBackFromGoogle(params.HTTPRequest)
+			return services.CallBackFromGoogle(db, params.HTTPRequest)
 		})
 	}
 
