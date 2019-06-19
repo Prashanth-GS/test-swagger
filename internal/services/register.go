@@ -20,10 +20,7 @@ import (
 
 // HandleRegister Function
 func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.Responder {
-	if params.RegisterRequest.Email == nil || params.RegisterRequest.Email == "" ||
-		params.RegisterRequest.Password == nil || params.RegisterRequest.Password == "" ||
-		params.RegisterRequest.Type == "" {
-		logger.Log.Error("BadRequest - Invalid parameters..")
+	if params.RegisterRequest.Type == "" {
 		return register.NewPostRegisterBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
@@ -33,14 +30,27 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 			Message: "Invalid parameters",
 		})
 	}
-	logger.Log.Info("Register called with parameters: " + params.RegisterRequest.Type +
-		" " + params.RegisterRequest.Email.(string) + " " + params.RegisterRequest.Password.(string))
-
 	logger.Log.Info(params.RegisterRequest.Type)
+
 	switch params.RegisterRequest.Type {
-	// case "gl":
-	// 	return HandleGoogleRegister(params.HTTPRequest)
+	case "gl":
+		return HandleGoogleRegister(params.HTTPRequest)
 	default:
+		if params.RegisterRequest.Email == nil || params.RegisterRequest.Email == "" ||
+			params.RegisterRequest.Password == nil || params.RegisterRequest.Password == "" ||
+			params.RegisterRequest.Type == "" {
+			logger.Log.Error("BadRequest - Invalid parameters..")
+			return register.NewPostRegisterBadRequest().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    400,
+					Message: "Invalid Parameters",
+				},
+				Message: "Invalid parameters",
+			})
+		}
+		logger.Log.Info("Register called with parameters: " + params.RegisterRequest.Type +
+			" " + params.RegisterRequest.Email.(string) + " " + params.RegisterRequest.Password.(string))
 		return registerOPUser(db, params)
 	}
 }
@@ -90,6 +100,14 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	empCount, err := params.RegisterRequest.EmployeeCount.(json.Number).Int64()
 	if err != nil {
 		logger.Log.Error(err.Error())
+		return register.NewPostRegisterDetailsBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Bad Request, expected an integer as Employee Count, but got something else",
+			},
+			Message: "BadRequest, Please enter a number for Employee Count field.",
+		})
 	}
 	user, err := database.SelectOneUser(db, claims.Email)
 	if err != nil {
@@ -336,7 +354,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 
 	// Send Email to the user..
 	to := mail.NewEmail("GSOP Support", params.RegisterRequest.Email.(string))
-	jwtToken, err := CreateJWT(params.RegisterRequest.Email.(string))
+	jwtToken, err := CreateJWT(params.RegisterRequest.Email.(string), expTime)
 	if err != nil {
 		logger.Log.Error(err.Error())
 	}
@@ -346,7 +364,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 		helpers.RegiserConfEmailSubject,
 		to,
 		helpers.RegiserConfEmailContent,
-		helpers.GetRegisterConfTemplate("http://localhost:9090/news-api/v1/register-confirmation/"+jwtToken),
+		helpers.GetRegisterConfTemplate("http://localhost:3000/selections/"+jwtToken),
 	)
 	client := sendgrid.NewSendClient(viper.GetString("sendgrid-apikey"))
 	_, err = client.Send(message)
@@ -367,5 +385,67 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 		Success: true,
 		Error:   nil,
 		Message: "Registration Initial Step Success, Email Confirmation Sent..",
+	})
+}
+
+func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
+	existingUser, err := database.SelectOneUser(db, userCreds.Email)
+	if err == nil {
+		if existingUser.ConfirmationAccepted || existingUser.DetailsRegistered {
+			return register.NewPostRegisterForbidden().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    403,
+					Message: "Given email is already registered",
+				},
+				Message: "Email is already registered, please continue to login or register using a different email address.",
+			})
+		}
+	}
+	user := database.UserAuth{
+		Email:                userCreds.Email,
+		Password:             "",
+		Role:                 "",
+		Organization:         "",
+		EmployeeCount:        0,
+		Designation:          "",
+		ConfirmationAccepted: true,
+		ConfirmationExpired:  false,
+		DetailsRegistered:    false,
+	}
+	err = database.AddNewUser(db, &user)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: err.Error(),
+			},
+			Message: "Error occurred when trying to process the request",
+		})
+	}
+	logger.Log.Info("User added to database..")
+
+	token, err := CreateJWT(userCreds.Email, expTime)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: err.Error(),
+			},
+			Message: "Error occurred when trying to create access token",
+		})
+	}
+
+	return register.NewGetCallbackGoogleOK().WithPayload(&models.LoginResponse{
+		Success: true,
+		Error:   nil,
+		Data: &models.LoginResponseData{
+			AccessToken: token,
+			ExpiresIn:   "5 mins",
+		},
 	})
 }

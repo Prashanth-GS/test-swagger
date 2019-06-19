@@ -65,6 +65,8 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	}
 	database.CreateUserAuthRelation(db)
 	database.CreateNewsRelation(db)
+
+	services.InitializeOAuthGoogle()
 	// Manual Configurations and setup here..
 
 	api.JSONConsumer = runtime.JSONConsumer()
@@ -109,6 +111,16 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	if api.NewsGetNewsHandler == nil {
 		api.NewsGetNewsHandler = news.GetNewsHandlerFunc(func(params news.GetNewsParams) middleware.Responder {
 			return services.HandleGetAllNews(db, &params)
+		})
+	}
+	if api.RegisterGetCallbackGoogleHandler == nil {
+		api.RegisterGetCallbackGoogleHandler = register.GetCallbackGoogleHandlerFunc(func(params register.GetCallbackGoogleParams) middleware.Responder {
+			return services.CallBackFromGoogle("register", db, params.HTTPRequest)
+		})
+	}
+	if api.LoginGetCallbackGoogleLoginHandler == nil {
+		api.LoginGetCallbackGoogleLoginHandler = login.GetCallbackGoogleLoginHandlerFunc(func(params login.GetCallbackGoogleLoginParams) middleware.Responder {
+			return services.CallBackFromGoogle("login", db, params.HTTPRequest)
 		})
 	}
 	if api.LoginGetRefreshTokenHandler == nil {

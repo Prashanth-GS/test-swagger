@@ -7,3 +7,11 @@ pgdb:
   username: 
   password: 
   database: 
+
+oauthStateString: 
+google:
+  clientID: 
+  clientSecret: 
+facebook:
+  clientID: 
+  clientSecret: 
