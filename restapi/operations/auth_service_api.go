@@ -49,6 +49,7 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		LoginPostResetPasswordHandler:                 nil,
 		RegisterGetCallbackGoogleHandler:              nil,
 		LoginGetCallbackGoogleLoginHandler:            nil,
+		LoginGetRefreshTokenHandler:                   nil,
 	}
 }
 
@@ -84,6 +85,8 @@ type AuthServiceAPI struct {
 	RegisterGetCallbackGoogleHandler register.GetCallbackGoogleHandler
 	// LoginGetCallbackGoogleLoginHandler sets the operation handler for the get callback google login operation
 	LoginGetCallbackGoogleLoginHandler login.GetCallbackGoogleLoginHandler
+	// LoginGetRefreshTokenHandler sets the operation handler for the get refresh token operation
+	LoginGetRefreshTokenHandler login.GetRefreshTokenHandler
 	// RegisterGetRegisterConfirmationTokenHandler sets the operation handler for the get register confirmation token operation
 	RegisterGetRegisterConfirmationTokenHandler register.GetRegisterConfirmationTokenHandler
 	// LoginGetResetPasswordConfirmationTokenHandler sets the operation handler for the get reset password confirmation token operation
@@ -167,6 +170,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.LoginGetCallbackGoogleLoginHandler == nil {
 		unregistered = append(unregistered, "login.GetCallbackGoogleLoginHandler")
+	}
+
+	if o.LoginGetRefreshTokenHandler == nil {
+		unregistered = append(unregistered, "login.GetRefreshTokenHandler")
 	}
 
 	if o.RegisterGetRegisterConfirmationTokenHandler == nil {
@@ -304,6 +311,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/callback-google-login"] = login.NewGetCallbackGoogleLogin(o.context, o.LoginGetCallbackGoogleLoginHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/refresh-token"] = login.NewGetRefreshToken(o.context, o.LoginGetRefreshTokenHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

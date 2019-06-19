@@ -24,6 +24,8 @@ paths:
     $ref: ./paths/registerDetails.yml
   /login:
     $ref: ./paths/login.yml
+  /refresh-token:
+    $ref: ./paths/refreshToken.yml
   /reset-password-request/{email}:
     $ref: ./paths/resetPasswordReq.yml
   /reset-password:

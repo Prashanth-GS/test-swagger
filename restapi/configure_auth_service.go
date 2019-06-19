@@ -117,6 +117,12 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 		})
 	}
 
+	if api.LoginGetRefreshTokenHandler == nil {
+		api.LoginGetRefreshTokenHandler = login.GetRefreshTokenHandlerFunc(func(params login.GetRefreshTokenParams) middleware.Responder {
+			return services.HandleRefreshJWT(&params)
+		})
+	}
+
 	api.ServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))

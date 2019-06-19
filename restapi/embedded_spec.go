@@ -47,6 +47,9 @@ func init() {
     "/login": {
       "$ref": "./paths/login.yml"
     },
+    "/refresh-token": {
+      "$ref": "./paths/refreshToken.yml"
+    },
     "/register": {
       "$ref": "./paths/register.yml"
     },
@@ -199,6 +202,51 @@ func init() {
               "$ref": "#/definitions/loginRequest"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/loginResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
+    "/refresh-token": {
+      "get": {
+        "tags": [
+          "login"
         ],
         "responses": {
           "200": {
