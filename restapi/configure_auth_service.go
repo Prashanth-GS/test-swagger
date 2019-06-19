@@ -22,6 +22,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/internal/services"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 )
 
@@ -62,7 +63,8 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	database.CreateUserAuthSchema(db)
+	database.CreateUserAuthRelation(db)
+	database.CreateNewsRelation(db)
 
 	services.InitializeOAuthGoogle()
 	// Manual Configurations and setup here..
@@ -106,6 +108,11 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.HandleResetPasswordConfirmation(&params)
 		})
 	}
+	if api.NewsGetNewsHandler == nil {
+		api.NewsGetNewsHandler = news.GetNewsHandlerFunc(func(params news.GetNewsParams) middleware.Responder {
+			return services.HandleGetAllNews(db, &params)
+		})
+	}
 	if api.RegisterGetCallbackGoogleHandler == nil {
 		api.RegisterGetCallbackGoogleHandler = register.GetCallbackGoogleHandlerFunc(func(params register.GetCallbackGoogleParams) middleware.Responder {
 			return services.CallBackFromGoogle("register", db, params.HTTPRequest)
@@ -116,7 +123,6 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.CallBackFromGoogle("login", db, params.HTTPRequest)
 		})
 	}
-
 	if api.LoginGetRefreshTokenHandler == nil {
 		api.LoginGetRefreshTokenHandler = login.GetRefreshTokenHandlerFunc(func(params login.GetRefreshTokenParams) middleware.Responder {
 			return services.HandleRefreshJWT(&params)

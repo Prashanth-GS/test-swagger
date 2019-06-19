@@ -1,0 +1,8 @@
+type: object
+properties:
+  imageUrl:
+    imageUrl: string
+  headline:
+    headline: string
+  description:
+    description: string

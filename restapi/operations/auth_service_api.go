@@ -20,6 +20,7 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 )
 
@@ -47,6 +48,7 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		RegisterPostRegisterHandler:                   nil,
 		RegisterPostRegisterDetailsHandler:            nil,
 		LoginPostResetPasswordHandler:                 nil,
+		NewsGetNewsHandler:                            nil,
 		RegisterGetCallbackGoogleHandler:              nil,
 		LoginGetCallbackGoogleLoginHandler:            nil,
 		LoginGetRefreshTokenHandler:                   nil,
@@ -81,6 +83,8 @@ type AuthServiceAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
+	// NewsGetNewsHandler sets the operation handler for the get news operation
+	NewsGetNewsHandler news.GetNewsHandler
 	// RegisterGetCallbackGoogleHandler sets the operation handler for the get callback google operation
 	RegisterGetCallbackGoogleHandler register.GetCallbackGoogleHandler
 	// LoginGetCallbackGoogleLoginHandler sets the operation handler for the get callback google login operation
@@ -162,6 +166,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
+	}
+
+	if o.NewsGetNewsHandler == nil {
+		unregistered = append(unregistered, "news.GetNewsHandler")
 	}
 
 	if o.RegisterGetCallbackGoogleHandler == nil {
@@ -301,6 +309,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/news"] = news.NewGetNews(o.context, o.NewsGetNewsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
