@@ -242,7 +242,7 @@ func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 			Message: "Incorrect Password",
 		})
 	}
-	expirationTime := time.Now().Add(1 * time.Minute)
+	expirationTime := time.Now().Add(10 * time.Minute)
 	claims := &Claims{
 		Email: params.LoginRequest.Email.(string),
 		StandardClaims: jwt.StandardClaims{
