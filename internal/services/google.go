@@ -25,8 +25,8 @@ var (
 		Endpoint:     google.Endpoint,
 	}
 	oauthStateStringGl  = ""
-	registerRedirectURL = "http://localhost:9090/news-api/v1/callback-google"
-	loginRedirectURL    = "http://localhost:9090/news-api/v1/callback-google-login"
+	registerRedirectURL = "http://localhost:3000/callback/google"
+	loginRedirectURL    = "http://localhost:3000/callback/login/google"
 )
 
 /*
