@@ -10,10 +10,11 @@ import (
 
 // UserAuth Model
 type UserAuth struct {
-	Email                string
+	ID                   int    `sql:", pk"`
+	Email                string `sql:",unique"`
 	Password             string
 	Mode                 string
-	OAuthID              string
+	OAuthID              string `sql:",unique"`
 	Role                 string
 	Organization         string
 	EmployeeCount        int
@@ -54,10 +55,22 @@ func SelectAllUsers(db *pg.DB) error {
 	return nil
 }
 
-// SelectOneUser Function
-func SelectOneUser(db *pg.DB, email string) (*UserAuth, error) {
-	user := &UserAuth{Email: email}
-	err := db.Select(user)
+// SelectOneUserByEmail Function
+func SelectOneUserByEmail(db *pg.DB, email string) (*UserAuth, error) {
+	user := new(UserAuth)
+	err := db.Model(user).Where("email = ?", email).Select()
+	if err != nil {
+		logger.Log.Error("Select error: " + err.Error())
+		return user, err
+	}
+
+	return user, nil
+}
+
+// SelectOneUserByOAuthID Function
+func SelectOneUserByOAuthID(db *pg.DB, id string) (*UserAuth, error) {
+	user := new(UserAuth)
+	err := db.Model(user).Where("o_auth_id = ?", id).Select()
 	if err != nil {
 		logger.Log.Error("Select error: " + err.Error())
 		return user, err

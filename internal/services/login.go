@@ -45,7 +45,7 @@ func HandleLogin(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 func HandleResetPasswordRequest(db *pg.DB, params *login.GetResetPasswordRequestEmailParams) middleware.Responder {
 	logger.Log.Info("ResetPasswordRequest called with parameter:" + params.Email)
 
-	user, err := database.SelectOneUser(db, params.Email)
+	user, err := database.SelectOneUserByEmail(db, params.Email)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
@@ -119,7 +119,7 @@ func HandleResetPassword(db *pg.DB, params *login.PostResetPasswordParams) middl
 	logger.Log.Info("Reset Password called with parameters: " + params.PasswordRequest.Email.(string) +
 		" " + params.PasswordRequest.Password.(string))
 
-	user, err := database.SelectOneUser(db, params.PasswordRequest.Email.(string))
+	user, err := database.SelectOneUserByEmail(db, params.PasswordRequest.Email.(string))
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err != nil {
@@ -208,7 +208,7 @@ func HandleResetPasswordConfirmation(params *login.GetResetPasswordConfirmationT
 }
 
 func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder {
-	user, err := database.SelectOneUser(db, params.LoginRequest.Email.(string))
+	user, err := database.SelectOneUserByEmail(db, params.LoginRequest.Email.(string))
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
@@ -360,7 +360,7 @@ func HandleRefreshJWT(params *login.GetRefreshTokenParams) middleware.Responder 
 }
 
 func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
-	user, err := database.SelectOneUser(db, userCreds.ID)
+	user, err := database.SelectOneUserByOAuthID(db, userCreds.ID)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {

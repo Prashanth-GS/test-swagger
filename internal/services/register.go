@@ -111,20 +111,23 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 			Message: "BadRequest, Please enter a number for Employee Count field.",
 		})
 	}
-	user, err := database.SelectOneUser(db, claims.Email)
+	user, err := database.SelectOneUserByEmail(db, claims.Email)
 	if err != nil {
 		logger.Log.Error(err.Error())
-		if err != nil {
-			logger.Log.Error(err.Error())
-			if err == pg.ErrNoRows {
-				return register.NewPostRegisterDetailsNotFound().WithPayload(&models.GeneralResponse{
-					Success: false,
-					Error: &models.GeneralResponseError{
-						Code:    404,
-						Message: "Given email is not found in the database",
-					},
-					Message: "Email is not registered, please register before registering organization details",
-				})
+		if err == pg.ErrNoRows {
+			user, err = database.SelectOneUserByOAuthID(db, claims.Email)
+			if err != nil {
+				logger.Log.Error(err.Error())
+				if err == pg.ErrNoRows {
+					return register.NewPostRegisterDetailsNotFound().WithPayload(&models.GeneralResponse{
+						Success: false,
+						Error: &models.GeneralResponseError{
+							Code:    404,
+							Message: "Given account is not found in the database",
+						},
+						Message: "Account is not registered, please register before registering organization details",
+					})
+				}
 			}
 		}
 	}
@@ -187,7 +190,7 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 	// Process JWT
 	tknStr := params.Token
 	claims, errJWT := ValidateJWT(tknStr)
-	user, err := database.SelectOneUser(db, claims.Email)
+	user, err := database.SelectOneUserByEmail(db, claims.Email)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
@@ -283,7 +286,7 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 }
 
 func registerOPUser(db *pg.DB, params *register.PostRegisterParams) middleware.Responder {
-	existingUser, err := database.SelectOneUser(db, params.RegisterRequest.Email.(string))
+	existingUser, err := database.SelectOneUserByEmail(db, params.RegisterRequest.Email.(string))
 	if err == nil {
 		if existingUser.ConfirmationAccepted || existingUser.DetailsRegistered {
 			return register.NewPostRegisterForbidden().WithPayload(&models.GeneralResponse{
@@ -393,47 +396,49 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 }
 
 func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
-	existingUser, err := database.SelectOneUser(db, userCreds.ID)
+	existingUser, err := database.SelectOneUserByOAuthID(db, userCreds.ID)
 	if err == nil {
-		if existingUser.ConfirmationAccepted || existingUser.DetailsRegistered {
+		if existingUser.DetailsRegistered {
 			return register.NewPostRegisterForbidden().WithPayload(&models.GeneralResponse{
 				Success: false,
 				Error: &models.GeneralResponseError{
 					Code:    403,
-					Message: "Given email is already registered",
+					Message: "Given account is already registered",
 				},
 				Message: "The Account is already registered, please continue to login or register using a different account.",
 			})
 		}
 	}
-	user := database.UserAuth{
-		Email:                "",
-		Password:             "",
-		Mode:                 "oa",
-		OAuthID:              userCreds.ID,
-		Role:                 "",
-		Organization:         "",
-		EmployeeCount:        0,
-		Designation:          "",
-		ConfirmationAccepted: true,
-		ConfirmationExpired:  false,
-		DetailsRegistered:    false,
+	if err != nil && err == pg.ErrNoRows {
+		user := database.UserAuth{
+			Email:                "",
+			Password:             "",
+			Mode:                 "oa",
+			OAuthID:              userCreds.ID,
+			Role:                 "",
+			Organization:         "",
+			EmployeeCount:        0,
+			Designation:          "",
+			ConfirmationAccepted: true,
+			ConfirmationExpired:  false,
+			DetailsRegistered:    false,
+		}
+		err = database.AddNewUser(db, &user)
+		if err != nil {
+			logger.Log.Error(err.Error())
+			return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    500,
+					Message: err.Error(),
+				},
+				Message: "Error occurred when trying to process the request",
+			})
+		}
+		logger.Log.Info("User added to database..")
 	}
-	err = database.AddNewUser(db, &user)
-	if err != nil {
-		logger.Log.Error(err.Error())
-		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    500,
-				Message: err.Error(),
-			},
-			Message: "Error occurred when trying to process the request",
-		})
-	}
-	logger.Log.Info("User added to database..")
 
-	token, err := CreateJWT(userCreds.Email, expTime)
+	token, err := CreateJWT(userCreds.ID, expTime)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
