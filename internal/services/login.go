@@ -34,6 +34,8 @@ func HandleLogin(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 	switch params.LoginRequest.Type {
 	case "gl":
 		return HandleGoogleLogin(params.HTTPRequest)
+	case "fb":
+		return HandleFacebookLogin(params.HTTPRequest)
 	default:
 		return loginOPUser(db, params)
 	}

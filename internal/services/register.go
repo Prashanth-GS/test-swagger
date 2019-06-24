@@ -35,6 +35,8 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 	switch params.RegisterRequest.Type {
 	case "gl":
 		return HandleGoogleRegister(params.HTTPRequest)
+	case "fb":
+		return HandleFacebookRegister(params.HTTPRequest)
 	default:
 		if params.RegisterRequest.Email == nil || params.RegisterRequest.Email == "" ||
 			params.RegisterRequest.Password == nil || params.RegisterRequest.Password == "" ||
