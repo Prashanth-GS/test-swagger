@@ -18,6 +18,10 @@ paths:
     $ref: ./paths/callbackGoogle.yml
   /callback-google-login:
     $ref: ./paths/callbackGoogleLogin.yml
+  /callback-facebook:
+    $ref: ./paths/callbackFacebook.yml
+  /callback-facebook-login:
+    $ref: ./paths/callbackFacebookLogin.yml
   /register-confirmation/{token}:
     $ref: ./paths/registerConfirmation.yml
   /register-details:

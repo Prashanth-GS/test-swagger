@@ -123,6 +123,16 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.CallBackFromGoogle("login", db, params.HTTPRequest)
 		})
 	}
+	if api.RegisterGetCallbackFacebookHandler == nil {
+		api.RegisterGetCallbackFacebookHandler = register.GetCallbackFacebookHandlerFunc(func(params register.GetCallbackFacebookParams) middleware.Responder {
+			return services.CallBackFromFacebook("register", db, params.HTTPRequest)
+		})
+	}
+	if api.LoginGetCallbackFacebookLoginHandler == nil {
+		api.LoginGetCallbackFacebookLoginHandler = login.GetCallbackFacebookLoginHandlerFunc(func(params login.GetCallbackFacebookLoginParams) middleware.Responder {
+			return services.CallBackFromFacebook("login", db, params.HTTPRequest)
+		})
+	}
 	if api.LoginGetRefreshTokenHandler == nil {
 		api.LoginGetRefreshTokenHandler = login.GetRefreshTokenHandlerFunc(func(params login.GetRefreshTokenParams) middleware.Responder {
 			return services.HandleRefreshJWT(&params)

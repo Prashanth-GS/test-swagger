@@ -24,9 +24,9 @@ var (
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}
-	oauthStateStringGl  = ""
-	registerRedirectURL = "http://localhost:3000/callback/google"
-	loginRedirectURL    = "http://localhost:3000/callback/login/google"
+	oauthStateStringGl    = ""
+	registerRedirectURLGl = "http://localhost:3000/callback/google"
+	loginRedirectURLGl    = "http://localhost:3000/callback/login/google"
 )
 
 /*
@@ -42,7 +42,7 @@ func InitializeOAuthGoogle() {
 HandleGoogleRegister Function
 */
 func HandleGoogleRegister(r *http.Request) middleware.Responder {
-	oauthConfGl.RedirectURL = registerRedirectURL
+	oauthConfGl.RedirectURL = registerRedirectURLGl
 	return HandleOAuth(r, oauthConfGl, oauthStateStringGl)
 }
 
@@ -50,7 +50,7 @@ func HandleGoogleRegister(r *http.Request) middleware.Responder {
 HandleGoogleLogin Function
 */
 func HandleGoogleLogin(r *http.Request) middleware.Responder {
-	oauthConfGl.RedirectURL = loginRedirectURL
+	oauthConfGl.RedirectURL = loginRedirectURLGl
 	return HandleOAuth(r, oauthConfGl, oauthStateStringGl)
 }
 

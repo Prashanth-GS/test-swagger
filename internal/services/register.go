@@ -325,6 +325,8 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 	user := database.UserAuth{
 		Email:                params.RegisterRequest.Email.(string),
 		Password:             params.RegisterRequest.Password.(string),
+		Mode:                 "op",
+		OAuthID:              "",
 		Role:                 "",
 		Organization:         "",
 		EmployeeCount:        0,
@@ -389,7 +391,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 }
 
 func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
-	existingUser, err := database.SelectOneUser(db, userCreds.Email)
+	existingUser, err := database.SelectOneUser(db, userCreds.ID)
 	if err == nil {
 		if existingUser.ConfirmationAccepted || existingUser.DetailsRegistered {
 			return register.NewPostRegisterForbidden().WithPayload(&models.GeneralResponse{
@@ -398,13 +400,15 @@ func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder
 					Code:    403,
 					Message: "Given email is already registered",
 				},
-				Message: "Email is already registered, please continue to login or register using a different email address.",
+				Message: "The Account is already registered, please continue to login or register using a different account.",
 			})
 		}
 	}
 	user := database.UserAuth{
-		Email:                userCreds.Email,
+		Email:                "",
 		Password:             "",
+		Mode:                 "oa",
+		OAuthID:              userCreds.ID,
 		Role:                 "",
 		Organization:         "",
 		EmployeeCount:        0,

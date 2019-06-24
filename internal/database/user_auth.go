@@ -10,8 +10,10 @@ import (
 
 // UserAuth Model
 type UserAuth struct {
-	Email                string `sql:", pk"`
+	Email                string
 	Password             string
+	Mode                 string
+	OAuthID              string
 	Role                 string
 	Organization         string
 	EmployeeCount        int

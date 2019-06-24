@@ -358,7 +358,7 @@ func HandleRefreshJWT(params *login.GetRefreshTokenParams) middleware.Responder 
 }
 
 func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
-	user, err := database.SelectOneUser(db, userCreds.Email)
+	user, err := database.SelectOneUser(db, userCreds.ID)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
@@ -366,9 +366,9 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 				Success: false,
 				Error: &models.GeneralResponseError{
 					Code:    404,
-					Message: "Given email is not found in the database",
+					Message: "Given ID is not found in the database",
 				},
-				Message: "Email is not registered, please register before logging in",
+				Message: "Account is not registered, please register before logging in",
 			})
 		}
 	}
@@ -383,7 +383,7 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 			Message: "Please complete organization registration and then, continue to Login.",
 		})
 	}
-	token, err := CreateJWT(userCreds.Email, expTime)
+	token, err := CreateJWT(userCreds.ID, expTime)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return login.NewGetCallbackGoogleLoginInternalServerError().WithPayload(&models.GeneralResponse{

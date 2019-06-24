@@ -52,6 +52,8 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		RegisterGetCallbackGoogleHandler:              nil,
 		LoginGetCallbackGoogleLoginHandler:            nil,
 		LoginGetRefreshTokenHandler:                   nil,
+		RegisterGetCallbackFacebookHandler:            nil,
+		LoginGetCallbackFacebookLoginHandler:          nil,
 	}
 }
 
@@ -83,12 +85,16 @@ type AuthServiceAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// NewsGetNewsHandler sets the operation handler for the get news operation
-	NewsGetNewsHandler news.GetNewsHandler
+	// RegisterGetCallbackFacebookHandler sets the operation handler for the get callback facebook operation
+	RegisterGetCallbackFacebookHandler register.GetCallbackFacebookHandler
+	// LoginGetCallbackFacebookLoginHandler sets the operation handler for the get callback facebook login operation
+	LoginGetCallbackFacebookLoginHandler login.GetCallbackFacebookLoginHandler
 	// RegisterGetCallbackGoogleHandler sets the operation handler for the get callback google operation
 	RegisterGetCallbackGoogleHandler register.GetCallbackGoogleHandler
 	// LoginGetCallbackGoogleLoginHandler sets the operation handler for the get callback google login operation
 	LoginGetCallbackGoogleLoginHandler login.GetCallbackGoogleLoginHandler
+	// NewsGetNewsHandler sets the operation handler for the get news operation
+	NewsGetNewsHandler news.GetNewsHandler
 	// LoginGetRefreshTokenHandler sets the operation handler for the get refresh token operation
 	LoginGetRefreshTokenHandler login.GetRefreshTokenHandler
 	// RegisterGetRegisterConfirmationTokenHandler sets the operation handler for the get register confirmation token operation
@@ -168,8 +174,12 @@ func (o *AuthServiceAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.NewsGetNewsHandler == nil {
-		unregistered = append(unregistered, "news.GetNewsHandler")
+	if o.RegisterGetCallbackFacebookHandler == nil {
+		unregistered = append(unregistered, "register.GetCallbackFacebookHandler")
+	}
+
+	if o.LoginGetCallbackFacebookLoginHandler == nil {
+		unregistered = append(unregistered, "login.GetCallbackFacebookLoginHandler")
 	}
 
 	if o.RegisterGetCallbackGoogleHandler == nil {
@@ -178,6 +188,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.LoginGetCallbackGoogleLoginHandler == nil {
 		unregistered = append(unregistered, "login.GetCallbackGoogleLoginHandler")
+	}
+
+	if o.NewsGetNewsHandler == nil {
+		unregistered = append(unregistered, "news.GetNewsHandler")
 	}
 
 	if o.LoginGetRefreshTokenHandler == nil {
@@ -313,7 +327,12 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/news"] = news.NewGetNews(o.context, o.NewsGetNewsHandler)
+	o.handlers["GET"]["/callback-facebook"] = register.NewGetCallbackFacebook(o.context, o.RegisterGetCallbackFacebookHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/callback-facebook-login"] = login.NewGetCallbackFacebookLogin(o.context, o.LoginGetCallbackFacebookLoginHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -324,6 +343,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/callback-google-login"] = login.NewGetCallbackGoogleLogin(o.context, o.LoginGetCallbackGoogleLoginHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/news"] = news.NewGetNews(o.context, o.NewsGetNewsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
