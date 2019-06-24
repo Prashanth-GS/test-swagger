@@ -58,12 +58,12 @@ func HandleFacebookLogin(r *http.Request) middleware.Responder {
 CallBackFromFacebook Function
 */
 func CallBackFromFacebook(action string, db *pg.DB, r *http.Request) middleware.Responder {
-	logger.Log.Info("Callback-gl..")
+	logger.Log.Info("Callback-fb..")
 
 	state := r.FormValue("state")
 	logger.Log.Info(state)
-	if state != oauthStateStringGl {
-		logger.Log.Info("invalid oauth state, expected " + oauthStateStringGl + ", got " + state + "\n")
+	if state != oauthStateStringFb {
+		logger.Log.Info("invalid oauth state, expected " + oauthStateStringFb + ", got " + state + "\n")
 		return register.NewGetCallbackFacebookBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
@@ -99,9 +99,9 @@ func CallBackFromFacebook(action string, db *pg.DB, r *http.Request) middleware.
 			Message: "Something went wrong please try again later.",
 		})
 	}
-	token, err := oauthConfGl.Exchange(oauth2.NoContext, code)
+	token, err := oauthConfFb.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		logger.Log.Error("oauthConfGl.Exchange() failed with " + err.Error() + "\n")
+		logger.Log.Error("oauthConfFb.Exchange() failed with " + err.Error() + "\n")
 		return register.NewGetCallbackFacebookInternalServerError().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{

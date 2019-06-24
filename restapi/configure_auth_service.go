@@ -67,6 +67,7 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	database.CreateNewsRelation(db)
 
 	services.InitializeOAuthGoogle()
+	services.InitializeOAuthFacebook()
 	// Manual Configurations and setup here..
 
 	api.JSONConsumer = runtime.JSONConsumer()
