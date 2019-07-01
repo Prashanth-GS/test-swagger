@@ -344,7 +344,23 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 	if userStatus == "new" {
 		err = database.AddNewUser(db, &user)
 	} else {
-		err = database.UpdateUser(db, &user)
+		existingUser, err := database.SelectOneUserByEmail(db, params.RegisterRequest.Email.(string))
+		if err != nil {
+			logger.Log.Error(err.Error())
+			return register.NewPostRegisterInternalServerError().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    500,
+					Message: err.Error(),
+				},
+				Message: "Error occurred when trying to process the request",
+			})
+		}
+		existingUser.Email = params.RegisterRequest.Email.(string)
+		existingUser.Password = params.RegisterRequest.Password.(string)
+		existingUser.ConfirmationAccepted = false
+		existingUser.ConfirmationExpired = false
+		err = database.UpdateUser(db, existingUser)
 	}
 	if err != nil {
 		logger.Log.Error(err.Error())
