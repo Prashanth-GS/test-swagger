@@ -20,7 +20,7 @@ func GetRegisterConfTemplate(link string) string {
 		<br /><br />
 		` + link + `
 		<br /><br />
-		If you don’t use this link within 30 mins, it will expire. To get a new link, visit https://www.google.com/ and reregister.
+		If you don’t use this link within 10 mins, it will expire. To get a new link, visit https://localhost:3000/ and reregister.
 		<br /><br />
 		Thanks,
 		<br />
@@ -43,7 +43,7 @@ func GetResetPasswordTemplate(link string) string {
 		<br /><br />
 		` + link + `
 		<br /><br />
-		If you don’t use this link within 30 mins, it will expire. To get a new password reset link, visit https://www.google.com/
+		If you don’t use this link within 10 mins, it will expire. To get a new password reset link, visit https://localhost:3000
 		<br /><br />
 		Thanks,
 		<br />

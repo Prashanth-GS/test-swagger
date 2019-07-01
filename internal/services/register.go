@@ -245,7 +245,7 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 				Code:    400,
 				Message: "Token validation produced an error",
 			},
-			Message: "Bad Request, Please reregister to continue..",
+			Message: "Session Expired, Please reregister to continue..",
 		})
 	}
 
