@@ -1,13 +1,10 @@
 package services
 
 import (
-	"strings"
-
 	"github.com/Prashanth-GS/test-swagger/internal/database"
 	"github.com/Prashanth-GS/test-swagger/internal/logger"
 	"github.com/Prashanth-GS/test-swagger/models"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-pg/pg"
 )
@@ -16,40 +13,40 @@ import (
 func HandleGetAllNews(db *pg.DB, params *news.GetNewsParams) middleware.Responder {
 	logger.Log.Info("Get All News called..")
 
-	authHeader := params.HTTPRequest.Header.Get("Authorization")
-	logger.Log.Info(authHeader)
-	if authHeader == "" {
-		return news.NewGetNewsBadRequest().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    400,
-				Message: "Authorization Header not set",
-			},
-			Message: "Bad Request, Please try again later.",
-		})
-	}
-	_, err := ValidateJWT(strings.Split(authHeader, " ")[1])
-	if err != nil {
-		logger.Log.Info(err.Error())
-		if err == jwt.ErrSignatureInvalid {
-			return news.NewGetNewsUnauthorized().WithPayload(&models.GeneralResponse{
-				Success: false,
-				Error: &models.GeneralResponseError{
-					Code:    401,
-					Message: "Token is Invalid",
-				},
-				Message: "Unauthorized, Please login to continue..",
-			})
-		}
-		return news.NewGetNewsBadRequest().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    400,
-				Message: "Token validation produced an error",
-			},
-			Message: "Bad Request, Please login to continue..",
-		})
-	}
+	// authHeader := params.HTTPRequest.Header.Get("Authorization")
+	// logger.Log.Info(authHeader)
+	// if authHeader == "" {
+	// 	return news.NewGetNewsBadRequest().WithPayload(&models.GeneralResponse{
+	// 		Success: false,
+	// 		Error: &models.GeneralResponseError{
+	// 			Code:    400,
+	// 			Message: "Authorization Header not set",
+	// 		},
+	// 		Message: "Bad Request, Please try again later.",
+	// 	})
+	// }
+	// _, err := ValidateJWT(strings.Split(authHeader, " ")[1])
+	// if err != nil {
+	// 	logger.Log.Info(err.Error())
+	// 	if err == jwt.ErrSignatureInvalid {
+	// 		return news.NewGetNewsUnauthorized().WithPayload(&models.GeneralResponse{
+	// 			Success: false,
+	// 			Error: &models.GeneralResponseError{
+	// 				Code:    401,
+	// 				Message: "Token is Invalid",
+	// 			},
+	// 			Message: "Unauthorized, Please login to continue..",
+	// 		})
+	// 	}
+	// 	return news.NewGetNewsBadRequest().WithPayload(&models.GeneralResponse{
+	// 		Success: false,
+	// 		Error: &models.GeneralResponseError{
+	// 			Code:    400,
+	// 			Message: "Token validation produced an error",
+	// 		},
+	// 		Message: "Bad Request, Please login to continue..",
+	// 	})
+	// }
 
 	newsList, err := database.SelectAllNews(db)
 	if err != nil {
