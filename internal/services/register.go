@@ -194,6 +194,14 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
+			user, err = database.SelectOneUserByOAuthID(db, claims.Email)
+			if err == nil && user.Mode == "oa" {
+				return register.NewGetRegisterConfirmationTokenOK().WithPayload(&models.GeneralResponse{
+					Success: true,
+					Error:   nil,
+					Message: "User Confirmation success, Proceed to Details Registration..",
+				})
+			}
 			return register.NewGetRegisterConfirmationTokenNotFound().WithPayload(&models.GeneralResponse{
 				Success: false,
 				Error: &models.GeneralResponseError{
