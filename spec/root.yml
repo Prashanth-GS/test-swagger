@@ -40,6 +40,8 @@ paths:
     $ref: ./paths/news.yml
   /add-news:
     $ref: ./paths/addNews.yml
+  /lock-user:
+    $ref: ./paths/lockUser.yml
 definitions:
   generalResponse:
     $ref: ./definitions/generalResponse.yml

@@ -22,6 +22,7 @@ type UserAuth struct {
 	ConfirmationAccepted bool `sql:"default: false"`
 	ConfirmationExpired  bool `sql:"default: false"`
 	DetailsRegistered    bool `sql:"default: false"`
+	Locked               bool `sql:"default: false"`
 }
 
 // CreateUserAuthRelation Function

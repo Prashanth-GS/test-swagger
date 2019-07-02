@@ -139,6 +139,11 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.HandleRefreshJWT(&params)
 		})
 	}
+	if api.LoginPostLockUserHandler == nil {
+		api.LoginPostLockUserHandler = login.PostLockUserHandlerFunc(func(params login.PostLockUserParams) middleware.Responder {
+			return services.HandleLockUser(db, &params)
+		})
+	}
 
 	api.ServerShutdown = func() {}
 

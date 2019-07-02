@@ -407,3 +407,8 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 		},
 	})
 }
+
+// HandleLockUser Function
+func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Responder {
+	return nil
+}

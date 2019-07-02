@@ -55,6 +55,7 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		RegisterGetCallbackFacebookHandler:            nil,
 		LoginGetCallbackFacebookLoginHandler:          nil,
 		NewsPostAddNewsHandler:                        nil,
+		LoginPostLockUserHandler:                      nil,
 	}
 }
 
@@ -106,6 +107,8 @@ type AuthServiceAPI struct {
 	LoginGetResetPasswordRequestEmailHandler login.GetResetPasswordRequestEmailHandler
 	// NewsPostAddNewsHandler sets the operation handler for the post add news operation
 	NewsPostAddNewsHandler news.PostAddNewsHandler
+	// LoginPostLockUserHandler sets the operation handler for the post lock user operation
+	LoginPostLockUserHandler login.PostLockUserHandler
 	// LoginPostLoginHandler sets the operation handler for the post login operation
 	LoginPostLoginHandler login.PostLoginHandler
 	// RegisterPostRegisterHandler sets the operation handler for the post register operation
@@ -215,6 +218,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.NewsPostAddNewsHandler == nil {
 		unregistered = append(unregistered, "news.PostAddNewsHandler")
+	}
+
+	if o.LoginPostLockUserHandler == nil {
+		unregistered = append(unregistered, "login.PostLockUserHandler")
 	}
 
 	if o.LoginPostLoginHandler == nil {
@@ -380,6 +387,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/add-news"] = news.NewPostAddNews(o.context, o.NewsPostAddNewsHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/lock-user"] = login.NewPostLockUser(o.context, o.LoginPostLockUserHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

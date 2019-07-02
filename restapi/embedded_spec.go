@@ -53,6 +53,9 @@ func init() {
     "/callback-google-login": {
       "$ref": "./paths/callbackGoogleLogin.yml"
     },
+    "/lock-user": {
+      "$ref": "./paths/lockUser.yml"
+    },
     "/login": {
       "$ref": "./paths/login.yml"
     },
@@ -310,6 +313,60 @@ func init() {
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/loginResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
+    "/lock-user": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "parameters": [
+          {
+            "name": "lockUserRequest",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/lockUserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
             }
           },
           "400": {
@@ -868,6 +925,17 @@ func init() {
         },
         "success": {
           "success": "boolean"
+        }
+      }
+    },
+    "lockUserRequest": {
+      "type": "object",
+      "properties": {
+        "cred": {
+          "cred": "string"
+        },
+        "mode": {
+          "mode": "string"
         }
       }
     },
