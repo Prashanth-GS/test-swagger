@@ -1014,11 +1014,11 @@ func init() {
         "designation": {
           "designation": "string"
         },
-        "email": {
-          "email": "string"
-        },
         "employeeCount": {
           "employeeCount": "int"
+        },
+        "name": {
+          "name": "string"
         },
         "organization": {
           "organization": "string"

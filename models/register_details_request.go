@@ -18,11 +18,11 @@ type RegisterDetailsRequest struct {
 	// designation
 	Designation interface{} `json:"designation,omitempty"`
 
-	// email
-	Email interface{} `json:"email,omitempty"`
-
 	// employee count
 	EmployeeCount interface{} `json:"employeeCount,omitempty"`
+
+	// name
+	Name interface{} `json:"name,omitempty"`
 
 	// organization
 	Organization interface{} `json:"organization,omitempty"`

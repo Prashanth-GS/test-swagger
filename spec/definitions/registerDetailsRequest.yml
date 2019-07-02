@@ -1,7 +1,7 @@
 type: object
 properties:
-  email:
-    email: string
+  name:
+    name: string
   organization:
     organization: string
   employeeCount:

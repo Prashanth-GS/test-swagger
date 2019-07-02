@@ -82,7 +82,8 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 			Message: "Bad Request, Please reregister to continue..",
 		})
 	}
-	if params.RegisterRequest.Organization == nil || params.RegisterRequest.Organization == "" ||
+	if params.RegisterRequest.Name == nil || params.RegisterRequest.Name == "" ||
+		params.RegisterRequest.Organization == nil || params.RegisterRequest.Organization == "" ||
 		params.RegisterRequest.Designation == nil || params.RegisterRequest.Designation == "" ||
 		params.RegisterRequest.EmployeeCount == nil || params.RegisterRequest.EmployeeCount == "" {
 		logger.Log.Error("BadRequest - Invalid parameters..")
@@ -157,6 +158,7 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	}
 
 	user.Role = "user"
+	user.Name = params.RegisterRequest.Name.(string)
 	user.EmployeeCount = int(empCount)
 	user.Organization = params.RegisterRequest.Organization.(string)
 	user.Designation = params.RegisterRequest.Designation.(string)
@@ -341,6 +343,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 		Mode:                 "op",
 		OAuthID:              "",
 		Role:                 "",
+		Name:                 "",
 		Organization:         "",
 		EmployeeCount:        0,
 		Designation:          "",
@@ -440,6 +443,7 @@ func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder
 			Mode:                 "oa",
 			OAuthID:              userCreds.ID,
 			Role:                 "",
+			Name:                 "",
 			Organization:         "",
 			EmployeeCount:        0,
 			Designation:          "",

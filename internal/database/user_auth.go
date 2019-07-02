@@ -16,6 +16,7 @@ type UserAuth struct {
 	Mode                 string
 	OAuthID              string `sql:",unique"`
 	Role                 string
+	Name                 string
 	Organization         string
 	EmployeeCount        int
 	Designation          string
