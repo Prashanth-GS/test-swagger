@@ -410,5 +410,60 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 
 // HandleLockUser Function
 func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Responder {
-	return nil
+	logger.Log.Info("Lock User called..")
+	// Check for the access Toke and verify that it is valid and belongs to a super user
+
+	if params.LockUserRequest.Mode == nil || params.LockUserRequest.Mode == "" ||
+		params.LockUserRequest.Cred == nil || params.LockUserRequest.Cred == "" {
+		logger.Log.Error("BadRequest - Invalid parameters..")
+		return login.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Invalid Parameters",
+			},
+			Message: "Invalid parameters",
+		})
+	}
+	user, err := database.SelectOneUserByEmail(db, params.LockUserRequest.Cred.(string))
+	if err != nil {
+		logger.Log.Error(err.Error())
+		if err == pg.ErrNoRows {
+			user, err = database.SelectOneUserByOAuthID(db, params.LockUserRequest.Cred.(string))
+			if err != nil {
+				logger.Log.Error(err.Error())
+				if err == pg.ErrNoRows {
+					return login.NewPostLockUserNotFound().WithPayload(&models.GeneralResponse{
+						Success: false,
+						Error: &models.GeneralResponseError{
+							Code:    404,
+							Message: "Given account is not found in the database",
+						},
+						Message: "Account is not registered, please register before registering organization details",
+					})
+				}
+			}
+		}
+	}
+
+	user.Locked = true
+	err = database.UpdateUser(db, user)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return login.NewPostLockUserInternalServerError().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    500,
+				Message: err.Error(),
+			},
+			Message: "Error occurred when trying to process the request",
+		})
+	}
+	logger.Log.Info("User " + params.LockUserRequest.Cred.(string) + " locked")
+
+	return login.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
+		Success: true,
+		Error:   nil,
+		Message: "User Registration success, Continue to Login..",
+	})
 }
