@@ -54,6 +54,7 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		LoginGetRefreshTokenHandler:                   nil,
 		RegisterGetCallbackFacebookHandler:            nil,
 		LoginGetCallbackFacebookLoginHandler:          nil,
+		NewsPostAddNewsHandler:                        nil,
 	}
 }
 
@@ -103,6 +104,8 @@ type AuthServiceAPI struct {
 	LoginGetResetPasswordConfirmationTokenHandler login.GetResetPasswordConfirmationTokenHandler
 	// LoginGetResetPasswordRequestEmailHandler sets the operation handler for the get reset password request email operation
 	LoginGetResetPasswordRequestEmailHandler login.GetResetPasswordRequestEmailHandler
+	// NewsPostAddNewsHandler sets the operation handler for the post add news operation
+	NewsPostAddNewsHandler news.PostAddNewsHandler
 	// LoginPostLoginHandler sets the operation handler for the post login operation
 	LoginPostLoginHandler login.PostLoginHandler
 	// RegisterPostRegisterHandler sets the operation handler for the post register operation
@@ -208,6 +211,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.LoginGetResetPasswordRequestEmailHandler == nil {
 		unregistered = append(unregistered, "login.GetResetPasswordRequestEmailHandler")
+	}
+
+	if o.NewsPostAddNewsHandler == nil {
+		unregistered = append(unregistered, "news.PostAddNewsHandler")
 	}
 
 	if o.LoginPostLoginHandler == nil {
@@ -368,6 +375,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/reset-password-request/{email}"] = login.NewGetResetPasswordRequestEmail(o.context, o.LoginGetResetPasswordRequestEmailHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/add-news"] = news.NewPostAddNews(o.context, o.NewsPostAddNewsHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

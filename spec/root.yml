@@ -38,6 +38,8 @@ paths:
     $ref: ./paths/resetPasswordConf.yml
   /news:
     $ref: ./paths/news.yml
+  /add-news:
+    $ref: ./paths/addNews.yml
 definitions:
   generalResponse:
     $ref: ./definitions/generalResponse.yml

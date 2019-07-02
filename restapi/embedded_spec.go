@@ -38,6 +38,9 @@ func init() {
   },
   "basePath": "/news-api/v1",
   "paths": {
+    "/add-news": {
+      "$ref": "./paths/addNews.yml"
+    },
     "/callback-facebook": {
       "$ref": "./paths/callbackFacebook.yml"
     },
@@ -108,6 +111,60 @@ func init() {
   },
   "basePath": "/news-api/v1",
   "paths": {
+    "/add-news": {
+      "post": {
+        "tags": [
+          "news"
+        ],
+        "parameters": [
+          {
+            "name": "addNewsRequest",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/news"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
     "/callback-facebook": {
       "get": {
         "tags": [
@@ -855,6 +912,20 @@ func init() {
         },
         "success": {
           "success": "boolean"
+        }
+      }
+    },
+    "news": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "string"
+        },
+        "headline": {
+          "headline": "string"
+        },
+        "imageUrl": {
+          "imageUrl": "string"
         }
       }
     },

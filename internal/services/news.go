@@ -87,3 +87,8 @@ func HandleGetAllNews(db *pg.DB, params *news.GetNewsParams) middleware.Responde
 		Data:    newsData,
 	})
 }
+
+// HandleAddNews Function
+func HandleAddNews() {
+	logger.Log.Info("Add news called..")
+}
