@@ -1,0 +1,16 @@
+type: object
+properties:
+  success:
+    success: boolean
+  error:
+    error: object
+    properties:
+      code:
+        code: int
+      message:
+        message: string
+  data:
+    name: news-list
+    type: array
+    items:
+      $ref: ./users.yml

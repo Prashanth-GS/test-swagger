@@ -1,0 +1,12 @@
+type: object
+properties:
+  name:
+    name: string
+  mode:
+    mode: string
+  ref:
+    ref: string
+  role:
+    role: string
+  locked:
+    locked: boolean
