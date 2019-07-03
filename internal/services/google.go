@@ -148,7 +148,7 @@ func CallBackFromGoogle(action string, db *pg.DB, r *http.Request) middleware.Re
 
 	if action == "register" {
 		logger.Log.Info("Attempting to register user..")
-		return registerOAuthUser(db, &userCred)
+		return registerOAuthUser(db, &userCred, "gl")
 	}
 	logger.Log.Info("Attempting to login user..")
 	return loginOAuthUser(db, &userCred)

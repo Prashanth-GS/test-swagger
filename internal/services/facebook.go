@@ -149,7 +149,7 @@ func CallBackFromFacebook(action string, db *pg.DB, r *http.Request) middleware.
 
 	if action == "register" {
 		logger.Log.Info("Attempting to register user..")
-		return registerOAuthUser(db, &userCred)
+		return registerOAuthUser(db, &userCred, "fb")
 	}
 	logger.Log.Info("Attempting to login user..")
 	return loginOAuthUser(db, &userCred)

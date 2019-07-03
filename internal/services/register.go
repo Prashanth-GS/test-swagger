@@ -197,7 +197,7 @@ func HandleRegisterConfirmation(db *pg.DB, params *register.GetRegisterConfirmat
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
 			user, err = database.SelectOneUserByOAuthID(db, claims.Email)
-			if err == nil && user.Mode == "oa" {
+			if err == nil && user.Mode != "op" {
 				return register.NewGetRegisterConfirmationTokenOK().WithPayload(&models.GeneralResponse{
 					Success: true,
 					Error:   nil,
@@ -369,6 +369,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 		}
 		existingUser.Email = params.RegisterRequest.Email.(string)
 		existingUser.Password = params.RegisterRequest.Password.(string)
+		existingUser.Mode = "op"
 		existingUser.ConfirmationAccepted = false
 		existingUser.ConfirmationExpired = false
 		err = database.UpdateUser(db, existingUser)
@@ -422,7 +423,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 	})
 }
 
-func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
+func registerOAuthUser(db *pg.DB, userCreds *oauthResponse, mode string) middleware.Responder {
 	existingUser, err := database.SelectOneUserByOAuthID(db, userCreds.ID)
 	if err == nil {
 		if existingUser.DetailsRegistered {
@@ -440,7 +441,7 @@ func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder
 		user := database.UserAuth{
 			Email:                "",
 			Password:             "",
-			Mode:                 "oa",
+			Mode:                 mode,
 			OAuthID:              userCreds.ID,
 			Role:                 "",
 			Name:                 "",
