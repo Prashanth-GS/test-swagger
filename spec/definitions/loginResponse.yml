@@ -16,3 +16,5 @@ properties:
         accessToken: string
       expiresIn:
         expiresIn: string
+      role:
+        role: string

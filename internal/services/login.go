@@ -286,6 +286,7 @@ func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 		Data: &models.LoginResponseData{
 			AccessToken: tokenString,
 			ExpiresIn:   expirationTime.String(),
+			Role:        user.Role,
 		},
 	})
 }
@@ -368,6 +369,7 @@ func HandleRefreshJWT(params *login.GetRefreshTokenParams) middleware.Responder 
 		Data: &models.LoginResponseData{
 			AccessToken: tokenString,
 			ExpiresIn:   expirationTime.String(),
+			Role:        nil,
 		},
 	})
 }
@@ -430,6 +432,7 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 		Data: &models.LoginResponseData{
 			AccessToken: token,
 			ExpiresIn:   expTime,
+			Role:        user.Role,
 		},
 	})
 }
@@ -493,7 +496,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 	}
 
 	if params.LockUserRequest.Mode == nil || params.LockUserRequest.Mode == "" ||
-		params.LockUserRequest.Cred == nil || params.LockUserRequest.Cred == "" {
+		params.LockUserRequest.Cred == nil || params.LockUserRequest.Cred == "" || params.LockUserRequest.Lock == nil {
 		logger.Log.Error("BadRequest - Invalid parameters..")
 		return login.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
@@ -525,7 +528,11 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 		}
 	}
 
-	user.Locked = true
+	if params.LockUserRequest.Lock.(bool) {
+		user.Locked = true
+	} else {
+		user.Locked = false
+	}
 	err = database.UpdateUser(db, user)
 	if err != nil {
 		logger.Log.Error(err.Error())
@@ -538,11 +545,21 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 			Message: "Error occurred when trying to process the request",
 		})
 	}
-	logger.Log.Info("User " + params.LockUserRequest.Cred.(string) + " locked")
+
+	if params.LockUserRequest.Lock.(bool) {
+		logger.Log.Info("User " + params.LockUserRequest.Cred.(string) + " locked")
+
+		return login.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
+			Success: true,
+			Error:   nil,
+			Message: "User successfully locked.",
+		})
+	}
+	logger.Log.Info("User " + params.LockUserRequest.Cred.(string) + " unlocked")
 
 	return login.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
 		Success: true,
 		Error:   nil,
-		Message: "User successfully locked.",
+		Message: "User successfully unlocked.",
 	})
 }

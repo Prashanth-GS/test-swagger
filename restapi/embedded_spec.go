@@ -934,6 +934,9 @@ func init() {
         "cred": {
           "cred": "string"
         },
+        "lock": {
+          "lock": "boolean"
+        },
         "mode": {
           "mode": "string"
         }
@@ -963,6 +966,9 @@ func init() {
             },
             "expiresIn": {
               "expiresIn": "string"
+            },
+            "role": {
+              "role": "string"
             }
           },
           "response": "object"

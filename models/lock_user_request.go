@@ -18,6 +18,9 @@ type LockUserRequest struct {
 	// cred
 	Cred interface{} `json:"cred,omitempty"`
 
+	// lock
+	Lock interface{} `json:"lock,omitempty"`
+
 	// mode
 	Mode interface{} `json:"mode,omitempty"`
 }

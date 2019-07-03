@@ -485,6 +485,7 @@ func registerOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder
 		Data: &models.LoginResponseData{
 			AccessToken: token,
 			ExpiresIn:   "5 mins",
+			Role:        nil,
 		},
 	})
 }

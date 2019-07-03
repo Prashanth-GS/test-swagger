@@ -107,6 +107,9 @@ type LoginResponseData struct {
 
 	// expires in
 	ExpiresIn interface{} `json:"expiresIn,omitempty"`
+
+	// role
+	Role interface{} `json:"role,omitempty"`
 }
 
 // Validate validates this login response data

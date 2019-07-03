@@ -4,3 +4,5 @@ properties:
     cred: string
   mode:
     mode: string
+  lock:
+    lock: boolean
