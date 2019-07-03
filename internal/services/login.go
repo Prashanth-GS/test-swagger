@@ -244,6 +244,19 @@ func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 			Message: "Incorrect Password",
 		})
 	}
+
+	// Check if user is locked by super user
+	if user.Locked {
+		return login.NewPostLoginForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "User has been locked by super user",
+			},
+			Message: "Sorry, your login has been locked. Please contact admin for more information.",
+		})
+	}
+
 	expirationTime := time.Now().Add(10 * time.Minute)
 	claims := &Claims{
 		Email: params.LoginRequest.Email.(string),
@@ -385,6 +398,19 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 			Message: "Please complete organization registration and then, continue to Login.",
 		})
 	}
+
+	// Check if user is locked by super user
+	if user.Locked {
+		return login.NewGetCallbackGoogleLoginForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "User has been locked by super user",
+			},
+			Message: "Sorry, your login has been locked. Please contact admin for more information.",
+		})
+	}
+
 	token, err := CreateJWT(userCreds.ID, expTime)
 	if err != nil {
 		logger.Log.Error(err.Error())
@@ -411,7 +437,60 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 // HandleLockUser Function
 func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Responder {
 	logger.Log.Info("Lock User called..")
+
 	// Check for the access Toke and verify that it is valid and belongs to a super user
+	authHeader := params.HTTPRequest.Header.Get("Authorization")
+	logger.Log.Info(authHeader)
+	claims, err := ValidateJWT(strings.Split(authHeader, " ")[1])
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return login.NewPostLockUserUnauthorized().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    401,
+					Message: "Token is Invalid",
+				},
+				Message: "Unauthorized, Please reregister to continue..",
+			})
+		}
+		return login.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    400,
+				Message: "Token validation produced an error",
+			},
+			Message: "Bad Request, Please reregister to continue..",
+		})
+	}
+
+	superUser, err := database.SelectOneUserByEmail(db, claims.Email)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		if err == pg.ErrNoRows {
+			if err == pg.ErrNoRows {
+				return login.NewPostLockUserNotFound().WithPayload(&models.GeneralResponse{
+					Success: false,
+					Error: &models.GeneralResponseError{
+						Code:    404,
+						Message: "Given account is not found in the database",
+					},
+					Message: "Account is not registered, please register before registering organization details",
+				})
+			}
+		}
+	}
+
+	if superUser.Role != "super" {
+		logger.Log.Info("user " + claims.Email + " is not a super user")
+		return login.NewPostLockUserForbidden().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    403,
+				Message: "user " + claims.Email + " is not a super user",
+			},
+			Message: "Forbidden, Please login as super user to continue the request..",
+		})
+	}
 
 	if params.LockUserRequest.Mode == nil || params.LockUserRequest.Mode == "" ||
 		params.LockUserRequest.Cred == nil || params.LockUserRequest.Cred == "" {
@@ -464,6 +543,6 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 	return login.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
 		Success: true,
 		Error:   nil,
-		Message: "User Registration success, Continue to Login..",
+		Message: "User successfully locked.",
 	})
 }
