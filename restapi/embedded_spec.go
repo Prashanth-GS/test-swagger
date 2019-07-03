@@ -354,7 +354,7 @@ func init() {
     "/lock-user": {
       "post": {
         "tags": [
-          "login"
+          "users-management"
         ],
         "parameters": [
           {
@@ -873,7 +873,7 @@ func init() {
     "/users": {
       "get": {
         "tags": [
-          "login"
+          "users-management"
         ],
         "responses": {
           "200": {

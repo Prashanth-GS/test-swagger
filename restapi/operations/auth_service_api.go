@@ -22,6 +22,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/users_management"
 )
 
 // NewAuthServiceAPI creates a new AuthService instance
@@ -55,8 +56,8 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		RegisterGetCallbackFacebookHandler:            nil,
 		LoginGetCallbackFacebookLoginHandler:          nil,
 		NewsPostAddNewsHandler:                        nil,
-		LoginPostLockUserHandler:                      nil,
-		LoginGetUsersHandler:                          nil,
+		UsersManagementPostLockUserHandler:            nil,
+		UsersManagementGetUsersHandler:                nil,
 	}
 }
 
@@ -106,12 +107,12 @@ type AuthServiceAPI struct {
 	LoginGetResetPasswordConfirmationTokenHandler login.GetResetPasswordConfirmationTokenHandler
 	// LoginGetResetPasswordRequestEmailHandler sets the operation handler for the get reset password request email operation
 	LoginGetResetPasswordRequestEmailHandler login.GetResetPasswordRequestEmailHandler
-	// LoginGetUsersHandler sets the operation handler for the get users operation
-	LoginGetUsersHandler login.GetUsersHandler
+	// UsersManagementGetUsersHandler sets the operation handler for the get users operation
+	UsersManagementGetUsersHandler users_management.GetUsersHandler
 	// NewsPostAddNewsHandler sets the operation handler for the post add news operation
 	NewsPostAddNewsHandler news.PostAddNewsHandler
-	// LoginPostLockUserHandler sets the operation handler for the post lock user operation
-	LoginPostLockUserHandler login.PostLockUserHandler
+	// UsersManagementPostLockUserHandler sets the operation handler for the post lock user operation
+	UsersManagementPostLockUserHandler users_management.PostLockUserHandler
 	// LoginPostLoginHandler sets the operation handler for the post login operation
 	LoginPostLoginHandler login.PostLoginHandler
 	// RegisterPostRegisterHandler sets the operation handler for the post register operation
@@ -219,16 +220,16 @@ func (o *AuthServiceAPI) Validate() error {
 		unregistered = append(unregistered, "login.GetResetPasswordRequestEmailHandler")
 	}
 
-	if o.LoginGetUsersHandler == nil {
-		unregistered = append(unregistered, "login.GetUsersHandler")
+	if o.UsersManagementGetUsersHandler == nil {
+		unregistered = append(unregistered, "users_management.GetUsersHandler")
 	}
 
 	if o.NewsPostAddNewsHandler == nil {
 		unregistered = append(unregistered, "news.PostAddNewsHandler")
 	}
 
-	if o.LoginPostLockUserHandler == nil {
-		unregistered = append(unregistered, "login.PostLockUserHandler")
+	if o.UsersManagementPostLockUserHandler == nil {
+		unregistered = append(unregistered, "users_management.PostLockUserHandler")
 	}
 
 	if o.LoginPostLoginHandler == nil {
@@ -393,7 +394,7 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/users"] = login.NewGetUsers(o.context, o.LoginGetUsersHandler)
+	o.handlers["GET"]["/users"] = users_management.NewGetUsers(o.context, o.UsersManagementGetUsersHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -403,7 +404,7 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/lock-user"] = login.NewPostLockUser(o.context, o.LoginPostLockUserHandler)
+	o.handlers["POST"]["/lock-user"] = users_management.NewPostLockUser(o.context, o.UsersManagementPostLockUserHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

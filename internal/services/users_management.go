@@ -6,14 +6,14 @@ import (
 	"github.com/Prashanth-GS/test-swagger/internal/database"
 	"github.com/Prashanth-GS/test-swagger/internal/logger"
 	"github.com/Prashanth-GS/test-swagger/models"
-	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/users_management"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-pg/pg"
 )
 
 // HandleGetAllUsers Function
-func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Responder {
+func HandleGetAllUsers(db *pg.DB, params *users_management.GetUsersParams) middleware.Responder {
 	logger.Log.Info("Get all users called..")
 
 	// Check for the access Toke and verify that it is valid and belongs to a super user
@@ -22,7 +22,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 	claims, err := ValidateJWT(strings.Split(authHeader, " ")[1])
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return login.NewGetUsersUnauthorized().WithPayload(&models.GeneralResponse{
+			return users_management.NewGetUsersUnauthorized().WithPayload(&models.GeneralResponse{
 				Success: false,
 				Error: &models.GeneralResponseError{
 					Code:    401,
@@ -31,7 +31,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 				Message: "Unauthorized, Please reregister to continue..",
 			})
 		}
-		return login.NewGetUsersBadRequest().WithPayload(&models.GeneralResponse{
+		return users_management.NewGetUsersBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    400,
@@ -46,7 +46,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
 			if err == pg.ErrNoRows {
-				return login.NewGetUsersNotFound().WithPayload(&models.GeneralResponse{
+				return users_management.NewGetUsersNotFound().WithPayload(&models.GeneralResponse{
 					Success: false,
 					Error: &models.GeneralResponseError{
 						Code:    404,
@@ -60,7 +60,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 
 	if superUser.Role != "super" {
 		logger.Log.Info("user " + claims.Email + " is not a super user")
-		return login.NewGetUsersForbidden().WithPayload(&models.GeneralResponse{
+		return users_management.NewGetUsersForbidden().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    403,
@@ -74,7 +74,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
-			return login.NewGetUsersNotFound().WithPayload(&models.GeneralResponse{
+			return users_management.NewGetUsersNotFound().WithPayload(&models.GeneralResponse{
 				Success: false,
 				Error: &models.GeneralResponseError{
 					Code:    404,
@@ -83,7 +83,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 				Message: "No news data found",
 			})
 		}
-		return login.NewGetUsersInternalServerError().WithPayload(&models.GeneralResponse{
+		return users_management.NewGetUsersInternalServerError().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    500,
@@ -109,7 +109,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 		usersData = append(usersData, &item)
 	}
 
-	return login.NewGetUsersOK().WithPayload(&models.AllUsersResponse{
+	return users_management.NewGetUsersOK().WithPayload(&models.AllUsersResponse{
 		Success: true,
 		Error:   nil,
 		Data:    usersData,
@@ -117,7 +117,7 @@ func HandleGetAllUsers(db *pg.DB, params *login.GetUsersParams) middleware.Respo
 }
 
 // HandleLockUser Function
-func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Responder {
+func HandleLockUser(db *pg.DB, params *users_management.PostLockUserParams) middleware.Responder {
 	logger.Log.Info("Lock User called..")
 
 	// Check for the access Toke and verify that it is valid and belongs to a super user
@@ -126,7 +126,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 	claims, err := ValidateJWT(strings.Split(authHeader, " ")[1])
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return login.NewPostLockUserUnauthorized().WithPayload(&models.GeneralResponse{
+			return users_management.NewPostLockUserUnauthorized().WithPayload(&models.GeneralResponse{
 				Success: false,
 				Error: &models.GeneralResponseError{
 					Code:    401,
@@ -135,7 +135,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 				Message: "Unauthorized, Please reregister to continue..",
 			})
 		}
-		return login.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
+		return users_management.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    400,
@@ -150,7 +150,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
 			if err == pg.ErrNoRows {
-				return login.NewPostLockUserNotFound().WithPayload(&models.GeneralResponse{
+				return users_management.NewPostLockUserNotFound().WithPayload(&models.GeneralResponse{
 					Success: false,
 					Error: &models.GeneralResponseError{
 						Code:    404,
@@ -164,7 +164,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 
 	if superUser.Role != "super" {
 		logger.Log.Info("user " + claims.Email + " is not a super user")
-		return login.NewPostLockUserForbidden().WithPayload(&models.GeneralResponse{
+		return users_management.NewPostLockUserForbidden().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    403,
@@ -177,7 +177,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 	if params.LockUserRequest.Mode == nil || params.LockUserRequest.Mode == "" ||
 		params.LockUserRequest.Cred == nil || params.LockUserRequest.Cred == "" || params.LockUserRequest.Lock == nil {
 		logger.Log.Error("BadRequest - Invalid parameters..")
-		return login.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
+		return users_management.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    400,
@@ -194,7 +194,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 			if err != nil {
 				logger.Log.Error(err.Error())
 				if err == pg.ErrNoRows {
-					return login.NewPostLockUserNotFound().WithPayload(&models.GeneralResponse{
+					return users_management.NewPostLockUserNotFound().WithPayload(&models.GeneralResponse{
 						Success: false,
 						Error: &models.GeneralResponseError{
 							Code:    404,
@@ -215,7 +215,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 	err = database.UpdateUser(db, user)
 	if err != nil {
 		logger.Log.Error(err.Error())
-		return login.NewPostLockUserInternalServerError().WithPayload(&models.GeneralResponse{
+		return users_management.NewPostLockUserInternalServerError().WithPayload(&models.GeneralResponse{
 			Success: false,
 			Error: &models.GeneralResponseError{
 				Code:    500,
@@ -228,7 +228,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 	if params.LockUserRequest.Lock.(bool) {
 		logger.Log.Info("User " + params.LockUserRequest.Cred.(string) + " locked")
 
-		return login.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
+		return users_management.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
 			Success: true,
 			Error:   nil,
 			Message: "User successfully locked.",
@@ -236,7 +236,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 	}
 	logger.Log.Info("User " + params.LockUserRequest.Cred.(string) + " unlocked")
 
-	return login.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
+	return users_management.NewPostLockUserOK().WithPayload(&models.GeneralResponse{
 		Success: true,
 		Error:   nil,
 		Message: "User successfully unlocked.",

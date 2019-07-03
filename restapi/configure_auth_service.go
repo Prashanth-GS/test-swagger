@@ -24,6 +24,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/users_management"
 )
 
 //go:generate swagger generate server --target ../../swg --name AuthService --spec ../spec/root.yml
@@ -139,13 +140,13 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.HandleRefreshJWT(&params)
 		})
 	}
-	if api.LoginPostLockUserHandler == nil {
-		api.LoginPostLockUserHandler = login.PostLockUserHandlerFunc(func(params login.PostLockUserParams) middleware.Responder {
+	if api.UsersManagementPostLockUserHandler == nil {
+		api.UsersManagementPostLockUserHandler = users_management.PostLockUserHandlerFunc(func(params users_management.PostLockUserParams) middleware.Responder {
 			return services.HandleLockUser(db, &params)
 		})
 	}
-	if api.LoginGetUsersHandler == nil {
-		api.LoginGetUsersHandler = login.GetUsersHandlerFunc(func(params login.GetUsersParams) middleware.Responder {
+	if api.UsersManagementGetUsersHandler == nil {
+		api.UsersManagementGetUsersHandler = users_management.GetUsersHandlerFunc(func(params users_management.GetUsersParams) middleware.Responder {
 			return services.HandleGetAllUsers(db, &params)
 		})
 	}
