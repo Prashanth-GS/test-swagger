@@ -1,5 +1,5 @@
 get:
-  tags: ["login"]
+  tags: ["users-management"]
   responses:
     200:
       description: OK
