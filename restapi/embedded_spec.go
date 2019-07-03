@@ -82,6 +82,9 @@ func init() {
     },
     "/reset-password-request/{email}": {
       "$ref": "./paths/resetPasswordReq.yml"
+    },
+    "/users": {
+      "$ref": "./paths/users.yml"
     }
   },
   "definitions": {
@@ -866,6 +869,51 @@ func init() {
           }
         }
       }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "login"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/allUsersResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -885,6 +933,49 @@ func init() {
               },
               "imageUrl": {
                 "imageUrl": "string"
+              }
+            }
+          },
+          "name": "news-list"
+        },
+        "error": {
+          "properties": {
+            "code": {
+              "code": "int"
+            },
+            "message": {
+              "message": "string"
+            }
+          },
+          "error": "object"
+        },
+        "success": {
+          "success": "boolean"
+        }
+      }
+    },
+    "allUsersResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "locked": {
+                "locked": "boolean"
+              },
+              "mode": {
+                "mode": "string"
+              },
+              "name": {
+                "name": "string"
+              },
+              "ref": {
+                "ref": "string"
+              },
+              "role": {
+                "role": "string"
               }
             }
           },

@@ -477,7 +477,7 @@ func HandleLockUser(db *pg.DB, params *login.PostLockUserParams) middleware.Resp
 						Code:    404,
 						Message: "Given account is not found in the database",
 					},
-					Message: "Account is not registered, please register before registering organization details",
+					Message: "Account is not registered, please register as a super user..",
 				})
 			}
 		}

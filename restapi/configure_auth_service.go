@@ -144,6 +144,11 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 			return services.HandleLockUser(db, &params)
 		})
 	}
+	if api.LoginGetUsersHandler == nil {
+		api.LoginGetUsersHandler = login.GetUsersHandlerFunc(func(params login.GetUsersParams) middleware.Responder {
+			return services.HandleGetAllUsers(db, &params)
+		})
+	}
 
 	api.ServerShutdown = func() {}
 

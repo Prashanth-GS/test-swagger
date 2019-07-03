@@ -46,15 +46,15 @@ func CreateUserAuthRelation(db *pg.DB) error {
 }
 
 // SelectAllUsers Function
-func SelectAllUsers(db *pg.DB) error {
+func SelectAllUsers(db *pg.DB) ([]UserAuth, error) {
 	var users []UserAuth
-	err := db.Model().Table("user_auth").Select(&users)
+	err := db.Model().Table("user_auths").Select(&users)
 	if err != nil {
 		logger.Log.Error("Select error: " + err.Error())
-		return err
+		return nil, err
 	}
 
-	return nil
+	return users, nil
 }
 
 // SelectOneUserByEmail Function

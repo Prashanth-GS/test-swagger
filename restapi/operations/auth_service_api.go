@@ -56,6 +56,7 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		LoginGetCallbackFacebookLoginHandler:          nil,
 		NewsPostAddNewsHandler:                        nil,
 		LoginPostLockUserHandler:                      nil,
+		LoginGetUsersHandler:                          nil,
 	}
 }
 
@@ -105,6 +106,8 @@ type AuthServiceAPI struct {
 	LoginGetResetPasswordConfirmationTokenHandler login.GetResetPasswordConfirmationTokenHandler
 	// LoginGetResetPasswordRequestEmailHandler sets the operation handler for the get reset password request email operation
 	LoginGetResetPasswordRequestEmailHandler login.GetResetPasswordRequestEmailHandler
+	// LoginGetUsersHandler sets the operation handler for the get users operation
+	LoginGetUsersHandler login.GetUsersHandler
 	// NewsPostAddNewsHandler sets the operation handler for the post add news operation
 	NewsPostAddNewsHandler news.PostAddNewsHandler
 	// LoginPostLockUserHandler sets the operation handler for the post lock user operation
@@ -214,6 +217,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.LoginGetResetPasswordRequestEmailHandler == nil {
 		unregistered = append(unregistered, "login.GetResetPasswordRequestEmailHandler")
+	}
+
+	if o.LoginGetUsersHandler == nil {
+		unregistered = append(unregistered, "login.GetUsersHandler")
 	}
 
 	if o.NewsPostAddNewsHandler == nil {
@@ -382,6 +389,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/reset-password-request/{email}"] = login.NewGetResetPasswordRequestEmail(o.context, o.LoginGetResetPasswordRequestEmailHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users"] = login.NewGetUsers(o.context, o.LoginGetUsersHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
