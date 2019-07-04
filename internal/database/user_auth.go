@@ -48,7 +48,7 @@ func CreateUserAuthRelation(db *pg.DB) error {
 // SelectAllUsers Function
 func SelectAllUsers(db *pg.DB) ([]UserAuth, error) {
 	var users []UserAuth
-	err := db.Model().Table("user_auths").Select(&users)
+	err := db.Model().Table("user_auths").Where("role = ?", "user").Select(&users)
 	if err != nil {
 		logger.Log.Error("Select error: " + err.Error())
 		return nil, err

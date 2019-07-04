@@ -25,7 +25,18 @@ func HandleGetAllNews(db *pg.DB, params *news.GetNewsParams) middleware.Responde
 	// 		Message: "Bad Request, Please try again later.",
 	// 	})
 	// }
-	// _, err := ValidateJWT(strings.Split(authHeader, " ")[1])
+	// authBearerArray := strings.Split(authHeader, " ")
+	// if len(authBearerArray) < 2 {
+	// 	return news.NewGetNewsUnauthorized().WithPayload(&models.GeneralResponse{
+	// 		Success: false,
+	// 		Error: &models.GeneralResponseError{
+	// 			Code:    401,
+	// 			Message: "Token is Invalid",
+	// 		},
+	// 		Message: "Unauthorized, Please login to continue..",
+	// 	})
+	// }
+	// _, err := ValidateJWT(authBearerArray[1])
 	// if err != nil {
 	// 	logger.Log.Info(err.Error())
 	// 	if err == jwt.ErrSignatureInvalid {

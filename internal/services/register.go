@@ -61,7 +61,18 @@ func HandleRegister(db *pg.DB, params *register.PostRegisterParams) middleware.R
 func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams) middleware.Responder {
 	authHeader := params.HTTPRequest.Header.Get("Authorization")
 	logger.Log.Info(authHeader)
-	claims, err := ValidateJWT(strings.Split(authHeader, " ")[1])
+	authBearerArray := strings.Split(authHeader, " ")
+	if len(authBearerArray) < 2 {
+		return register.NewPostRegisterDetailsUnauthorized().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    401,
+				Message: "Token is Invalid",
+			},
+			Message: "Unauthorized, Please reregister to continue..",
+		})
+	}
+	claims, err := ValidateJWT(authBearerArray[1])
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			return register.NewPostRegisterDetailsUnauthorized().WithPayload(&models.GeneralResponse{

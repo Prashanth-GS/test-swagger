@@ -294,7 +294,18 @@ func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 // HandleRefreshJWT Function
 func HandleRefreshJWT(params *login.GetRefreshTokenParams) middleware.Responder {
 	authHeader := params.HTTPRequest.Header.Get("Authorization")
-	tknStr := strings.Split(authHeader, " ")[1]
+	authBearerArray := strings.Split(authHeader, " ")
+	if len(authBearerArray) < 2 {
+		return login.NewGetRefreshTokenUnauthorized().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    401,
+				Message: "Token is Invalid",
+			},
+			Message: "Unauthorized, Please login to continue..",
+		})
+	}
+	tknStr := authBearerArray[1]
 	logger.Log.Info(tknStr)
 
 	claims := &Claims{}

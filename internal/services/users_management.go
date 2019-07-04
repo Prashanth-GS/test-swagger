@@ -19,7 +19,18 @@ func HandleGetAllUsers(db *pg.DB, params *users_management.GetUsersParams) middl
 	// Check for the access Toke and verify that it is valid and belongs to a super user
 	authHeader := params.HTTPRequest.Header.Get("Authorization")
 	logger.Log.Info(authHeader)
-	claims, err := ValidateJWT(strings.Split(authHeader, " ")[1])
+	authBearerArray := strings.Split(authHeader, " ")
+	if len(authBearerArray) < 2 {
+		return users_management.NewGetUsersUnauthorized().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    401,
+				Message: "Token is Invalid",
+			},
+			Message: "Unauthorized, Please login to continue..",
+		})
+	}
+	claims, err := ValidateJWT(authBearerArray[1])
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			return users_management.NewGetUsersUnauthorized().WithPayload(&models.GeneralResponse{
@@ -28,7 +39,7 @@ func HandleGetAllUsers(db *pg.DB, params *users_management.GetUsersParams) middl
 					Code:    401,
 					Message: "Token is Invalid",
 				},
-				Message: "Unauthorized, Please reregister to continue..",
+				Message: "Unauthorized, Please login to continue..",
 			})
 		}
 		return users_management.NewGetUsersBadRequest().WithPayload(&models.GeneralResponse{
@@ -37,7 +48,7 @@ func HandleGetAllUsers(db *pg.DB, params *users_management.GetUsersParams) middl
 				Code:    400,
 				Message: "Token validation produced an error",
 			},
-			Message: "Bad Request, Please reregister to continue..",
+			Message: "Bad Request, Please login to continue..",
 		})
 	}
 
@@ -123,7 +134,18 @@ func HandleLockUser(db *pg.DB, params *users_management.PostLockUserParams) midd
 	// Check for the access Toke and verify that it is valid and belongs to a super user
 	authHeader := params.HTTPRequest.Header.Get("Authorization")
 	logger.Log.Info(authHeader)
-	claims, err := ValidateJWT(strings.Split(authHeader, " ")[1])
+	authBearerArray := strings.Split(authHeader, " ")
+	if len(authBearerArray) < 2 {
+		return users_management.NewPostLockUserUnauthorized().WithPayload(&models.GeneralResponse{
+			Success: false,
+			Error: &models.GeneralResponseError{
+				Code:    401,
+				Message: "Token is Invalid",
+			},
+			Message: "Unauthorized, Please login to continue..",
+		})
+	}
+	claims, err := ValidateJWT(authBearerArray[1])
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			return users_management.NewPostLockUserUnauthorized().WithPayload(&models.GeneralResponse{
@@ -132,7 +154,7 @@ func HandleLockUser(db *pg.DB, params *users_management.PostLockUserParams) midd
 					Code:    401,
 					Message: "Token is Invalid",
 				},
-				Message: "Unauthorized, Please reregister to continue..",
+				Message: "Unauthorized, Please login to continue..",
 			})
 		}
 		return users_management.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
@@ -141,7 +163,7 @@ func HandleLockUser(db *pg.DB, params *users_management.PostLockUserParams) midd
 				Code:    400,
 				Message: "Token validation produced an error",
 			},
-			Message: "Bad Request, Please reregister to continue..",
+			Message: "Bad Request, Please login to continue..",
 		})
 	}
 
