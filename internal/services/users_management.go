@@ -1,6 +1,7 @@
 package services
 
 import (
+	"reflect"
 	"strings"
 
 	"github.com/Prashanth-GS/test-swagger/internal/database"
@@ -197,7 +198,8 @@ func HandleLockUser(db *pg.DB, params *users_management.PostLockUserParams) midd
 	}
 
 	if params.LockUserRequest.Mode == nil || params.LockUserRequest.Mode == "" ||
-		params.LockUserRequest.Cred == nil || params.LockUserRequest.Cred == "" || params.LockUserRequest.Lock == nil {
+		params.LockUserRequest.Cred == nil || params.LockUserRequest.Cred == "" ||
+		params.LockUserRequest.Lock == nil || reflect.TypeOf(params.LockUserRequest.Lock).Kind() != reflect.Bool {
 		logger.Log.Error("BadRequest - Invalid parameters..")
 		return users_management.NewPostLockUserBadRequest().WithPayload(&models.GeneralResponse{
 			Success: false,
