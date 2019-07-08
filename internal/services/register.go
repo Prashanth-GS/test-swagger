@@ -348,9 +348,10 @@ func registerOPUser(db *pg.DB, params *register.PostRegisterParams) middleware.R
 }
 
 func registerProcess(userStatus string, db *pg.DB, params *register.PostRegisterParams) middleware.Responder {
+	passwordHash := HashPassword(params.RegisterRequest.Password.(string))
 	user := database.UserAuth{
 		Email:                params.RegisterRequest.Email.(string),
-		Password:             params.RegisterRequest.Password.(string),
+		Password:             passwordHash,
 		Mode:                 "op",
 		OAuthID:              "",
 		Role:                 "",
@@ -379,7 +380,7 @@ func registerProcess(userStatus string, db *pg.DB, params *register.PostRegister
 			})
 		}
 		existingUser.Email = params.RegisterRequest.Email.(string)
-		existingUser.Password = params.RegisterRequest.Password.(string)
+		existingUser.Password = passwordHash
 		existingUser.Mode = "op"
 		existingUser.ConfirmationAccepted = false
 		existingUser.ConfirmationExpired = false

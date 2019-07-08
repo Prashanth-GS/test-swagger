@@ -21,7 +21,10 @@ require (
 	github.com/sendgrid/sendgrid-go v3.4.1+incompatible
 	github.com/spf13/viper v1.4.0
 	go.uber.org/zap v1.10.0
-	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
+	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb // indirect
+	golang.org/x/text v0.3.2 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )

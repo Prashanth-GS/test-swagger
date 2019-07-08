@@ -148,7 +148,8 @@ func HandleResetPassword(db *pg.DB, params *login.PostResetPasswordParams) middl
 		})
 	}
 
-	user.Password = params.PasswordRequest.Password.(string)
+	passwordHash := HashPassword(params.PasswordRequest.Password.(string))
+	user.Password = passwordHash
 	err = database.UpdateUser(db, user)
 	if err != nil {
 		logger.Log.Error(err.Error())
@@ -233,7 +234,7 @@ func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 			Message: "Please complete organization registration and then, continue to Login.",
 		})
 	}
-	if user.Password != params.LoginRequest.Password.(string) {
+	if !CheckPassword(user.Password, params.LoginRequest.Password.(string)) {
 		logger.Log.Info("Incorrect password..")
 		return login.NewPostLoginUnauthorized().WithPayload(&models.GeneralResponse{
 			Success: false,
