@@ -52,7 +52,7 @@ func HandleGetDashboardSetup(db *pg.DB, params *page_management.GetDashboardDeta
 		})
 	}
 
-	superUser, err := database.SelectOneUserByEmail(db, claims.Email)
+	user, err := database.SelectOneUserByEmail(db, claims.Email)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
@@ -77,16 +77,19 @@ func HandleGetDashboardSetup(db *pg.DB, params *page_management.GetDashboardDeta
 		})
 	}
 
-	if superUser.Role != "super" {
+	if user.Role != "super" {
 		logger.Log.Info("user " + claims.Email + " is not a super user")
-		return page_management.NewGetDashboardDetailsEmailTypeForbidden().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    403,
-				Message: "user " + claims.Email + " is not a super user",
-			},
-			Message: "Forbidden, Please login as super user to continue the request..",
-		})
+		if user.Email != claims.Email {
+			logger.Log.Info("Logged in user is neither a super user or the owner of the information..")
+			return page_management.NewGetDashboardDetailsEmailTypeForbidden().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    403,
+					Message: "user " + claims.Email + " is not a super user of the owner of requested information",
+				},
+				Message: "Forbidden, Please login as super user or request your own information to continue the request..",
+			})
+		}
 	}
 	logger.Log.Info("Type: " + params.Type + " \nEmail: " + params.Email)
 
