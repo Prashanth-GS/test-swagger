@@ -53,6 +53,12 @@ func init() {
     "/callback-google-login": {
       "$ref": "./paths/callbackGoogleLogin.yml"
     },
+    "/dashboard-details/{email}/{type}": {
+      "$ref": "./paths/dashboardDetails.yml"
+    },
+    "/dashboard-setup": {
+      "$ref": "./paths/dashboardSetup.yml"
+    },
     "/lock-user": {
       "$ref": "./paths/lockUser.yml"
     },
@@ -316,6 +322,119 @@ func init() {
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/loginResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
+    "/dashboard-details/{email}/{type}": {
+      "get": {
+        "tags": [
+          "page-management"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "email",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "type",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dashboardDetailsResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
+    "/dashboard-setup": {
+      "post": {
+        "tags": [
+          "page-management"
+        ],
+        "parameters": [
+          {
+            "name": "dashboardSetupRequest",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/dashboardSetupRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
             }
           },
           "400": {
@@ -994,6 +1113,83 @@ func init() {
         },
         "success": {
           "success": "boolean"
+        }
+      }
+    },
+    "dashboardDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "properties": {
+            "bgColor": {
+              "bgColor": "string"
+            },
+            "fontColor": {
+              "fontColor": "string"
+            },
+            "logoURL": {
+              "logoURL": "string"
+            },
+            "newsfeedBGColor": {
+              "newsfeedBGColor": "string"
+            },
+            "newsfeedFontColor": {
+              "newsfeedFontColor": "string"
+            },
+            "organization": {
+              "organization": "string"
+            },
+            "userRef": {
+              "userRef": "string"
+            },
+            "userType": {
+              "userType": "string"
+            }
+          },
+          "response": "object"
+        },
+        "error": {
+          "properties": {
+            "code": {
+              "code": "int"
+            },
+            "message": {
+              "message": "string"
+            }
+          },
+          "error": "object"
+        },
+        "success": {
+          "success": "boolean"
+        }
+      }
+    },
+    "dashboardSetupRequest": {
+      "type": "object",
+      "properties": {
+        "bgColor": {
+          "bgColor": "string"
+        },
+        "fontColor": {
+          "fontColor": "string"
+        },
+        "logoURL": {
+          "logoURL": "string"
+        },
+        "newseedFontColor": {
+          "newseedFontColor": "string"
+        },
+        "newsfeedBGColor": {
+          "newsfeedBGColor": "string"
+        },
+        "organization": {
+          "organization": "string"
+        },
+        "userRef": {
+          "userRef": "string"
+        },
+        "userType": {
+          "userType": "string"
         }
       }
     },

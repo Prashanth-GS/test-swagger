@@ -44,6 +44,10 @@ paths:
     $ref: ./paths/users.yml
   /lock-user:
     $ref: ./paths/lockUser.yml
+  /dashboard-details/{email}/{type}:
+    $ref: ./paths/dashboardDetails.yml
+  /dashboard-setup:
+    $ref: ./paths/dashboardSetup.yml
 definitions:
   generalResponse:
     $ref: ./definitions/generalResponse.yml

@@ -1,0 +1,32 @@
+post:
+  tags: ["page-management"]
+  parameters:
+    - name: dashboardSetupRequest
+      in: body
+      schema:
+        $ref: './definitions/dashboardSetupRequest.yml'
+  responses:
+    200:
+      description: OK
+      schema:
+        $ref: './definitions/generalResponse.yml'
+    400:
+      description: BAD REQUEST
+      schema:
+        $ref: './definitions/generalResponse.yml'
+    401:
+      description: UNAUTHORIZED
+      schema:
+        $ref: './definitions/generalResponse.yml'
+    403:
+      description: FORBIDDEN
+      schema:
+        $ref: './definitions/generalResponse.yml'
+    404:
+      description: NOT FOUND
+      schema:
+        $ref: './definitions/generalResponse.yml'
+    500:
+      description: INTERNAL SERVER ERROR
+      schema:
+        $ref: './definitions/generalResponse.yml'

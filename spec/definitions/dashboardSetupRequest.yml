@@ -1,0 +1,18 @@
+type: object
+properties:
+  userRef:
+    userRef: string
+  userType:
+    userType: string
+  logoURL:
+    logoURL: string
+  organization:
+    organization: string
+  bgColor:
+    bgColor: string
+  fontColor:
+    fontColor: string
+  newsfeedBGColor:
+    newsfeedBGColor: string
+  newseedFontColor:
+    newseedFontColor: string

@@ -10,20 +10,25 @@ import (
 
 // UserAuth Model
 type UserAuth struct {
-	ID                   int    `sql:", pk"`
-	Email                string `sql:",unique"`
-	Password             string
-	Mode                 string
-	OAuthID              string `sql:",unique"`
-	Role                 string
-	Name                 string
-	Organization         string
-	EmployeeCount        int
-	Designation          string
-	ConfirmationAccepted bool `sql:"default: false"`
-	ConfirmationExpired  bool `sql:"default: false"`
-	DetailsRegistered    bool `sql:"default: false"`
-	Locked               bool `sql:"default: false"`
+	ID                      int    `sql:", pk"`
+	Email                   string `sql:",unique"`
+	Password                string
+	Mode                    string
+	OAuthID                 string `sql:",unique"`
+	Role                    string
+	Name                    string
+	Organization            string
+	EmployeeCount           int
+	Designation             string
+	ConfirmationAccepted    bool `sql:"default: false"`
+	ConfirmationExpired     bool `sql:"default: false"`
+	DetailsRegistered       bool `sql:"default: false"`
+	Locked                  bool `sql:"default: false"`
+	LogoURL                 string
+	BackgroundColor         string
+	FontColor               string
+	NewsfeedBackgroundColor string
+	NewsfeedFontColor       string
 }
 
 // CreateUserAuthRelation Function

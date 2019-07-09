@@ -1,0 +1,30 @@
+type: object
+properties:
+  success:
+    success: boolean
+  error:
+    error: object
+    properties:
+      code:
+        code: int
+      message:
+        message: string
+  data:
+    response: object
+    properties:
+      userRef:
+        userRef: string
+      userType:
+        userType: string
+      logoURL:
+        logoURL: string
+      organization:
+        organization: string
+      bgColor:
+        bgColor: string
+      fontColor:
+        fontColor: string
+      newsfeedBGColor:
+        newsfeedBGColor: string
+      newsfeedFontColor:
+        newsfeedFontColor: string

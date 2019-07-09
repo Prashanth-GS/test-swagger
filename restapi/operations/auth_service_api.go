@@ -21,6 +21,7 @@ import (
 
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/page_management"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/users_management"
 )
@@ -42,22 +43,24 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		RegisterGetRegisterConfirmationTokenHandler:   nil,
-		LoginGetResetPasswordConfirmationTokenHandler: nil,
-		LoginGetResetPasswordRequestEmailHandler:      nil,
-		LoginPostLoginHandler:                         nil,
-		RegisterPostRegisterHandler:                   nil,
-		RegisterPostRegisterDetailsHandler:            nil,
-		LoginPostResetPasswordHandler:                 nil,
-		NewsGetNewsHandler:                            nil,
-		RegisterGetCallbackGoogleHandler:              nil,
-		LoginGetCallbackGoogleLoginHandler:            nil,
-		LoginGetRefreshTokenHandler:                   nil,
-		RegisterGetCallbackFacebookHandler:            nil,
-		LoginGetCallbackFacebookLoginHandler:          nil,
-		NewsPostAddNewsHandler:                        nil,
-		UsersManagementPostLockUserHandler:            nil,
-		UsersManagementGetUsersHandler:                nil,
+		RegisterGetRegisterConfirmationTokenHandler:       nil,
+		LoginGetResetPasswordConfirmationTokenHandler:     nil,
+		LoginGetResetPasswordRequestEmailHandler:          nil,
+		LoginPostLoginHandler:                             nil,
+		RegisterPostRegisterHandler:                       nil,
+		RegisterPostRegisterDetailsHandler:                nil,
+		LoginPostResetPasswordHandler:                     nil,
+		NewsGetNewsHandler:                                nil,
+		RegisterGetCallbackGoogleHandler:                  nil,
+		LoginGetCallbackGoogleLoginHandler:                nil,
+		LoginGetRefreshTokenHandler:                       nil,
+		RegisterGetCallbackFacebookHandler:                nil,
+		LoginGetCallbackFacebookLoginHandler:              nil,
+		NewsPostAddNewsHandler:                            nil,
+		UsersManagementPostLockUserHandler:                nil,
+		UsersManagementGetUsersHandler:                    nil,
+		PageManagementGetDashboardDetailsEmailTypeHandler: nil,
+		PageManagementPostDashboardSetupHandler:           nil,
 	}
 }
 
@@ -97,6 +100,8 @@ type AuthServiceAPI struct {
 	RegisterGetCallbackGoogleHandler register.GetCallbackGoogleHandler
 	// LoginGetCallbackGoogleLoginHandler sets the operation handler for the get callback google login operation
 	LoginGetCallbackGoogleLoginHandler login.GetCallbackGoogleLoginHandler
+	// PageManagementGetDashboardDetailsEmailTypeHandler sets the operation handler for the get dashboard details email type operation
+	PageManagementGetDashboardDetailsEmailTypeHandler page_management.GetDashboardDetailsEmailTypeHandler
 	// NewsGetNewsHandler sets the operation handler for the get news operation
 	NewsGetNewsHandler news.GetNewsHandler
 	// LoginGetRefreshTokenHandler sets the operation handler for the get refresh token operation
@@ -111,6 +116,8 @@ type AuthServiceAPI struct {
 	UsersManagementGetUsersHandler users_management.GetUsersHandler
 	// NewsPostAddNewsHandler sets the operation handler for the post add news operation
 	NewsPostAddNewsHandler news.PostAddNewsHandler
+	// PageManagementPostDashboardSetupHandler sets the operation handler for the post dashboard setup operation
+	PageManagementPostDashboardSetupHandler page_management.PostDashboardSetupHandler
 	// UsersManagementPostLockUserHandler sets the operation handler for the post lock user operation
 	UsersManagementPostLockUserHandler users_management.PostLockUserHandler
 	// LoginPostLoginHandler sets the operation handler for the post login operation
@@ -200,6 +207,10 @@ func (o *AuthServiceAPI) Validate() error {
 		unregistered = append(unregistered, "login.GetCallbackGoogleLoginHandler")
 	}
 
+	if o.PageManagementGetDashboardDetailsEmailTypeHandler == nil {
+		unregistered = append(unregistered, "page_management.GetDashboardDetailsEmailTypeHandler")
+	}
+
 	if o.NewsGetNewsHandler == nil {
 		unregistered = append(unregistered, "news.GetNewsHandler")
 	}
@@ -226,6 +237,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.NewsPostAddNewsHandler == nil {
 		unregistered = append(unregistered, "news.PostAddNewsHandler")
+	}
+
+	if o.PageManagementPostDashboardSetupHandler == nil {
+		unregistered = append(unregistered, "page_management.PostDashboardSetupHandler")
 	}
 
 	if o.UsersManagementPostLockUserHandler == nil {
@@ -369,6 +384,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/dashboard-details/{email}/{type}"] = page_management.NewGetDashboardDetailsEmailType(o.context, o.PageManagementGetDashboardDetailsEmailTypeHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/news"] = news.NewGetNews(o.context, o.NewsGetNewsHandler)
 
 	if o.handlers["GET"] == nil {
@@ -400,6 +420,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/add-news"] = news.NewPostAddNews(o.context, o.NewsPostAddNewsHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/dashboard-setup"] = page_management.NewPostDashboardSetup(o.context, o.PageManagementPostDashboardSetupHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

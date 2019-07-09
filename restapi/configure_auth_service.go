@@ -23,6 +23,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/restapi/operations"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/page_management"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/register"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/users_management"
 )
@@ -148,6 +149,16 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	if api.UsersManagementGetUsersHandler == nil {
 		api.UsersManagementGetUsersHandler = users_management.GetUsersHandlerFunc(func(params users_management.GetUsersParams) middleware.Responder {
 			return services.HandleGetAllUsers(db, &params)
+		})
+	}
+	if api.PageManagementGetDashboardDetailsEmailTypeHandler == nil {
+		api.PageManagementGetDashboardDetailsEmailTypeHandler = page_management.GetDashboardDetailsEmailTypeHandlerFunc(func(params page_management.GetDashboardDetailsEmailTypeParams) middleware.Responder {
+			return services.HandleGetDashboardSetup(db, &params)
+		})
+	}
+	if api.PageManagementPostDashboardSetupHandler == nil {
+		api.PageManagementPostDashboardSetupHandler = page_management.PostDashboardSetupHandlerFunc(func(params page_management.PostDashboardSetupParams) middleware.Responder {
+			return services.HandlePostDashboardSetup(db, &params)
 		})
 	}
 
