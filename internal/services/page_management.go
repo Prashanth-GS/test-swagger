@@ -75,7 +75,7 @@ func HandleGetDashboardSetup(db *pg.DB, params *page_management.GetDashboardDeta
 
 	if user.Role != "super" {
 		logger.Log.Info("user " + claims.Email + " is not a super user")
-		if user.Email != claims.Email {
+		if user.Email != claims.Email && user.OAuthID != claims.Email {
 			logger.Log.Info("Logged in user is neither a super user or the owner of the information..")
 			return page_management.NewGetDashboardDetailsEmailTypeForbidden().WithPayload(&models.GeneralResponse{
 				Success: false,
