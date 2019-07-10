@@ -288,6 +288,8 @@ func loginOPUser(db *pg.DB, params *login.PostLoginParams) middleware.Responder 
 			AccessToken: tokenString,
 			ExpiresIn:   expirationTime.String(),
 			Role:        user.Role,
+			UserType:    user.Mode,
+			UserRef:     user.Email,
 		},
 	})
 }
@@ -445,6 +447,8 @@ func loginOAuthUser(db *pg.DB, userCreds *oauthResponse) middleware.Responder {
 			AccessToken: token,
 			ExpiresIn:   expTime,
 			Role:        user.Role,
+			UserType:    user.Mode,
+			UserRef:     user.OAuthID,
 		},
 	})
 }

@@ -18,3 +18,7 @@ properties:
         expiresIn: string
       role:
         role: string
+      userType:
+        userType: string
+      userRef:
+        userref: string

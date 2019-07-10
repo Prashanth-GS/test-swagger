@@ -110,6 +110,12 @@ type LoginResponseData struct {
 
 	// role
 	Role interface{} `json:"role,omitempty"`
+
+	// user ref
+	UserRef interface{} `json:"userRef,omitempty"`
+
+	// user type
+	UserType interface{} `json:"userType,omitempty"`
 }
 
 // Validate validates this login response data

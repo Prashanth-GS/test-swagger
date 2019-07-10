@@ -160,7 +160,6 @@ func HandleGetDashboardSetup(db *pg.DB, params *page_management.GetDashboardDeta
 		Data: &models.DashboardDetailsResponseData{
 			UserRef:           params.Email,
 			UserType:          params.Type,
-			Organization:      userDetails.Organization,
 			LogoURL:           userDetails.LogoURL,
 			BgColor:           userDetails.BackgroundColor,
 			FontColor:         userDetails.FontColor,
@@ -299,7 +298,6 @@ func HandlePostDashboardSetup(db *pg.DB, params *page_management.PostDashboardSe
 	}
 
 	userDetails.LogoURL = params.DashboardSetupRequest.LogoURL.(string)
-	userDetails.Organization = params.DashboardSetupRequest.Organization.(string)
 	userDetails.BackgroundColor = params.DashboardSetupRequest.BgColor.(string)
 	userDetails.FontColor = params.DashboardSetupRequest.FontColor.(string)
 	userDetails.NewsfeedBackgroundColor = params.DashboardSetupRequest.NewsfeedBGColor.(string)

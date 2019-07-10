@@ -1256,6 +1256,12 @@ func init() {
             },
             "role": {
               "role": "string"
+            },
+            "userRef": {
+              "userref": "string"
+            },
+            "userType": {
+              "userType": "string"
             }
           },
           "response": "object"
