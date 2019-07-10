@@ -56,25 +56,21 @@ func HandleGetDashboardSetup(db *pg.DB, params *page_management.GetDashboardDeta
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
-			if err == pg.ErrNoRows {
-				return page_management.NewGetDashboardDetailsEmailTypeNotFound().WithPayload(&models.GeneralResponse{
-					Success: false,
-					Error: &models.GeneralResponseError{
-						Code:    404,
-						Message: "Given account is not found in the database",
-					},
-					Message: "Account is not registered, please register as a super user..",
-				})
+			user, err = database.SelectOneUserByOAuthID(db, claims.Email)
+			if err != nil {
+				logger.Log.Error(err.Error())
+				if err == pg.ErrNoRows {
+					return page_management.NewGetDashboardDetailsEmailTypeNotFound().WithPayload(&models.GeneralResponse{
+						Success: false,
+						Error: &models.GeneralResponseError{
+							Code:    404,
+							Message: "Given account is not found in the database",
+						},
+						Message: "Account is not registered, please register to continue..",
+					})
+				}
 			}
 		}
-		return page_management.NewGetDashboardDetailsEmailTypeInternalServerError().WithPayload(&models.GeneralResponse{
-			Success: false,
-			Error: &models.GeneralResponseError{
-				Code:    500,
-				Message: err.Error(),
-			},
-			Message: "Error occurred when trying to process the request",
-		})
 	}
 
 	if user.Role != "super" {
@@ -213,16 +209,14 @@ func HandlePostDashboardSetup(db *pg.DB, params *page_management.PostDashboardSe
 	if err != nil {
 		logger.Log.Error(err.Error())
 		if err == pg.ErrNoRows {
-			if err == pg.ErrNoRows {
-				return page_management.NewPostDashboardSetupNotFound().WithPayload(&models.GeneralResponse{
-					Success: false,
-					Error: &models.GeneralResponseError{
-						Code:    404,
-						Message: "Given account is not found in the database",
-					},
-					Message: "Account is not registered, please register as a super user..",
-				})
-			}
+			return page_management.NewPostDashboardSetupNotFound().WithPayload(&models.GeneralResponse{
+				Success: false,
+				Error: &models.GeneralResponseError{
+					Code:    404,
+					Message: "Given account is not found in the database",
+				},
+				Message: "Account is not registered, please register as a super user..",
+			})
 		}
 		return page_management.NewPostDashboardSetupInternalServerError().WithPayload(&models.GeneralResponse{
 			Success: false,
