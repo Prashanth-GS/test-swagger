@@ -10,7 +10,7 @@ properties:
       message:
         message: string
   data:
-    name: users-list
+    name: tld-list
     type: array
     items:
-      $ref: ./users.yml
+      $ref: ./toplevelDomain.yml

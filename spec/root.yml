@@ -48,6 +48,8 @@ paths:
     $ref: ./paths/dashboardDetails.yml
   /dashboard-setup:
     $ref: ./paths/dashboardSetup.yml
+  /toplevel-domain:
+    $ref: ./paths/toplevelDomain.yml
 definitions:
   generalResponse:
     $ref: ./definitions/generalResponse.yml
