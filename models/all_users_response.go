@@ -111,8 +111,17 @@ func (m *AllUsersResponse) UnmarshalBinary(b []byte) error {
 // swagger:model AllUsersResponseDataItems0
 type AllUsersResponseDataItems0 struct {
 
+	// bg color
+	BgColor interface{} `json:"bgColor,omitempty"`
+
+	// font color
+	FontColor interface{} `json:"fontColor,omitempty"`
+
 	// locked
 	Locked interface{} `json:"locked,omitempty"`
+
+	// logo URL
+	LogoURL interface{} `json:"logoURL,omitempty"`
 
 	// mode
 	Mode interface{} `json:"mode,omitempty"`
@@ -120,11 +129,23 @@ type AllUsersResponseDataItems0 struct {
 	// name
 	Name interface{} `json:"name,omitempty"`
 
+	// newsfeed b g color
+	NewsfeedBGColor interface{} `json:"newsfeedBGColor,omitempty"`
+
+	// newsfeed font color
+	NewsfeedFontColor interface{} `json:"newsfeedFontColor,omitempty"`
+
+	// organization
+	Organization interface{} `json:"organization,omitempty"`
+
 	// ref
 	Ref interface{} `json:"ref,omitempty"`
 
 	// role
 	Role interface{} `json:"role,omitempty"`
+
+	// toplevel domain
+	ToplevelDomain interface{} `json:"toplevelDomain,omitempty"`
 }
 
 // Validate validates this all users response data items0

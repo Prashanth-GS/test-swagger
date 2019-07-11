@@ -1081,8 +1081,17 @@ func init() {
           "items": {
             "type": "object",
             "properties": {
+              "bgColor": {
+                "bgColor": "string"
+              },
+              "fontColor": {
+                "fontColor": "string"
+              },
               "locked": {
                 "locked": "boolean"
+              },
+              "logoURL": {
+                "logoURL": "string"
               },
               "mode": {
                 "mode": "string"
@@ -1090,11 +1099,23 @@ func init() {
               "name": {
                 "name": "string"
               },
+              "newsfeedBGColor": {
+                "newsfeedBGColor": "string"
+              },
+              "newsfeedFontColor": {
+                "newsfeedFontColor": "string"
+              },
+              "organization": {
+                "organization": "string"
+              },
               "ref": {
                 "ref": "string"
               },
               "role": {
                 "role": "string"
+              },
+              "toplevelDomain": {
+                "toplevelDomain": "string"
               }
             }
           },
@@ -1321,6 +1342,9 @@ func init() {
         },
         "organization": {
           "organization": "string"
+        },
+        "toplevelDomain": {
+          "toplevelDomain": "string"
         }
       }
     },

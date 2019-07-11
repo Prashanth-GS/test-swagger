@@ -8,3 +8,5 @@ properties:
     employeeCount: int
   designation:
     designation: string
+  toplevelDomain:
+    toplevelDomain: string

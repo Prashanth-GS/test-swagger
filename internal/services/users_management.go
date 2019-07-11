@@ -108,10 +108,17 @@ func HandleGetAllUsers(db *pg.DB, params *users_management.GetUsersParams) middl
 	var usersData []*models.AllUsersResponseDataItems0
 	for _, UserItem := range usersList {
 		item := models.AllUsersResponseDataItems0{
-			Name:   UserItem.Name,
-			Mode:   UserItem.Mode,
-			Role:   UserItem.Role,
-			Locked: UserItem.Locked,
+			Name:              UserItem.Name,
+			Mode:              UserItem.Mode,
+			Role:              UserItem.Role,
+			Locked:            UserItem.Locked,
+			Organization:      UserItem.Organization,
+			ToplevelDomain:    UserItem.ToplevelDomain,
+			LogoURL:           UserItem.LogoURL,
+			BgColor:           UserItem.BackgroundColor,
+			FontColor:         UserItem.FontColor,
+			NewsfeedBGColor:   UserItem.NewsfeedBackgroundColor,
+			NewsfeedFontColor: UserItem.NewsfeedFontColor,
 		}
 		if UserItem.Mode == "op" {
 			item.Ref = UserItem.Email

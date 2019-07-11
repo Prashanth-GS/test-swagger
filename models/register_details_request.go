@@ -26,6 +26,9 @@ type RegisterDetailsRequest struct {
 
 	// organization
 	Organization interface{} `json:"organization,omitempty"`
+
+	// toplevel domain
+	ToplevelDomain interface{} `json:"toplevelDomain,omitempty"`
 }
 
 // Validate validates this register details request

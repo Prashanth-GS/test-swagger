@@ -95,6 +95,7 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	}
 	if params.RegisterRequest.Name == nil || params.RegisterRequest.Name == "" ||
 		params.RegisterRequest.Organization == nil || params.RegisterRequest.Organization == "" ||
+		params.RegisterRequest.ToplevelDomain == nil || params.RegisterRequest.ToplevelDomain == "" ||
 		params.RegisterRequest.Designation == nil || params.RegisterRequest.Designation == "" ||
 		params.RegisterRequest.EmployeeCount == nil || params.RegisterRequest.EmployeeCount == "" {
 		logger.Log.Error("BadRequest - Invalid parameters..")
@@ -174,6 +175,7 @@ func HandleRegisterDetails(db *pg.DB, params *register.PostRegisterDetailsParams
 	user.Organization = params.RegisterRequest.Organization.(string)
 	user.Designation = params.RegisterRequest.Designation.(string)
 	user.DetailsRegistered = true
+	user.ToplevelDomain = params.RegisterRequest.ToplevelDomain.(string)
 
 	err = database.UpdateUser(db, user)
 	if err != nil {

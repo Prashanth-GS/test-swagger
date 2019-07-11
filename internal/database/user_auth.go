@@ -29,6 +29,7 @@ type UserAuth struct {
 	FontColor               string
 	NewsfeedBackgroundColor string
 	NewsfeedFontColor       string
+	ToplevelDomain          string
 }
 
 // CreateUserAuthRelation Function
