@@ -67,6 +67,7 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	}
 	database.CreateUserAuthRelation(db)
 	database.CreateNewsRelation(db)
+	database.CreateTLDomainsRelation(db)
 
 	services.InitializeOAuthGoogle()
 	services.InitializeOAuthFacebook()
