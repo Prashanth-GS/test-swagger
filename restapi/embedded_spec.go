@@ -89,6 +89,9 @@ func init() {
     "/reset-password-request/{email}": {
       "$ref": "./paths/resetPasswordReq.yml"
     },
+    "/toplevel-domain": {
+      "$ref": "./paths/toplevelDomain.yml"
+    },
     "/users": {
       "$ref": "./paths/users.yml"
     }
@@ -989,6 +992,103 @@ func init() {
         }
       }
     },
+    "/toplevel-domain": {
+      "get": {
+        "tags": [
+          "domain-management"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/allTLDResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "domain-management"
+        ],
+        "parameters": [
+          {
+            "name": "addTLDRequest",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/toplevelDomain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "schema": {
+              "$ref": "#/definitions/generalResponse"
+            }
+          }
+        }
+      }
+    },
     "/users": {
       "get": {
         "tags": [
@@ -1073,6 +1173,43 @@ func init() {
         }
       }
     },
+    "allTLDResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "description": "string"
+              },
+              "name": {
+                "name": "string"
+              },
+              "owner": {
+                "owner": "string"
+              }
+            }
+          },
+          "name": "tld-list"
+        },
+        "error": {
+          "properties": {
+            "code": {
+              "code": "int"
+            },
+            "message": {
+              "message": "string"
+            }
+          },
+          "error": "object"
+        },
+        "success": {
+          "success": "boolean"
+        }
+      }
+    },
     "allUsersResponse": {
       "type": "object",
       "properties": {
@@ -1119,7 +1256,7 @@ func init() {
               }
             }
           },
-          "name": "news-list"
+          "name": "users-list"
         },
         "error": {
           "properties": {
@@ -1359,6 +1496,20 @@ func init() {
         },
         "type": {
           "type": "string"
+        }
+      }
+    },
+    "toplevelDomain": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "string"
+        },
+        "name": {
+          "name": "string"
+        },
+        "owner": {
+          "owner": "string"
         }
       }
     },

@@ -47,3 +47,13 @@ func SelectAllDomains(db *pg.DB) ([]ToplevelDomain, error) {
 
 	return tlDomain, nil
 }
+
+// AddNewToplevelDomain Function
+func AddNewToplevelDomain(db *pg.DB, tld *ToplevelDomain) error {
+	if err := db.Insert(tld); err != nil {
+		logger.Log.Error("Insert Error: " + err.Error())
+		return err
+	}
+	logger.Log.Info("ToplevelDomain added..")
+	return nil
+}

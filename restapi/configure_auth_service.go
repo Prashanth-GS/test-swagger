@@ -21,6 +21,7 @@ import (
 	"github.com/Prashanth-GS/test-swagger/internal/logger"
 	"github.com/Prashanth-GS/test-swagger/internal/services"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations"
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/domain_management"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/page_management"
@@ -160,6 +161,16 @@ func configureAPI(api *operations.AuthServiceAPI) http.Handler {
 	if api.PageManagementPostDashboardSetupHandler == nil {
 		api.PageManagementPostDashboardSetupHandler = page_management.PostDashboardSetupHandlerFunc(func(params page_management.PostDashboardSetupParams) middleware.Responder {
 			return services.HandlePostDashboardSetup(db, &params)
+		})
+	}
+	if api.DomainManagementGetToplevelDomainHandler == nil {
+		api.DomainManagementGetToplevelDomainHandler = domain_management.GetToplevelDomainHandlerFunc(func(params domain_management.GetToplevelDomainParams) middleware.Responder {
+			return services.HandleGetTLD(db, &params)
+		})
+	}
+	if api.DomainManagementPostToplevelDomainHandler == nil {
+		api.DomainManagementPostToplevelDomainHandler = domain_management.PostToplevelDomainHandlerFunc(func(params domain_management.PostToplevelDomainParams) middleware.Responder {
+			return services.HandlePostTLD(db, &params)
 		})
 	}
 

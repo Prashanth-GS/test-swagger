@@ -19,6 +19,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"github.com/Prashanth-GS/test-swagger/restapi/operations/domain_management"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/login"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/news"
 	"github.com/Prashanth-GS/test-swagger/restapi/operations/page_management"
@@ -61,6 +62,8 @@ func NewAuthServiceAPI(spec *loads.Document) *AuthServiceAPI {
 		UsersManagementGetUsersHandler:                    nil,
 		PageManagementGetDashboardDetailsEmailTypeHandler: nil,
 		PageManagementPostDashboardSetupHandler:           nil,
+		DomainManagementGetToplevelDomainHandler:          nil,
+		DomainManagementPostToplevelDomainHandler:         nil,
 	}
 }
 
@@ -112,6 +115,8 @@ type AuthServiceAPI struct {
 	LoginGetResetPasswordConfirmationTokenHandler login.GetResetPasswordConfirmationTokenHandler
 	// LoginGetResetPasswordRequestEmailHandler sets the operation handler for the get reset password request email operation
 	LoginGetResetPasswordRequestEmailHandler login.GetResetPasswordRequestEmailHandler
+	// DomainManagementGetToplevelDomainHandler sets the operation handler for the get toplevel domain operation
+	DomainManagementGetToplevelDomainHandler domain_management.GetToplevelDomainHandler
 	// UsersManagementGetUsersHandler sets the operation handler for the get users operation
 	UsersManagementGetUsersHandler users_management.GetUsersHandler
 	// NewsPostAddNewsHandler sets the operation handler for the post add news operation
@@ -128,6 +133,8 @@ type AuthServiceAPI struct {
 	RegisterPostRegisterDetailsHandler register.PostRegisterDetailsHandler
 	// LoginPostResetPasswordHandler sets the operation handler for the post reset password operation
 	LoginPostResetPasswordHandler login.PostResetPasswordHandler
+	// DomainManagementPostToplevelDomainHandler sets the operation handler for the post toplevel domain operation
+	DomainManagementPostToplevelDomainHandler domain_management.PostToplevelDomainHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -231,6 +238,10 @@ func (o *AuthServiceAPI) Validate() error {
 		unregistered = append(unregistered, "login.GetResetPasswordRequestEmailHandler")
 	}
 
+	if o.DomainManagementGetToplevelDomainHandler == nil {
+		unregistered = append(unregistered, "domain_management.GetToplevelDomainHandler")
+	}
+
 	if o.UsersManagementGetUsersHandler == nil {
 		unregistered = append(unregistered, "users_management.GetUsersHandler")
 	}
@@ -261,6 +272,10 @@ func (o *AuthServiceAPI) Validate() error {
 
 	if o.LoginPostResetPasswordHandler == nil {
 		unregistered = append(unregistered, "login.PostResetPasswordHandler")
+	}
+
+	if o.DomainManagementPostToplevelDomainHandler == nil {
+		unregistered = append(unregistered, "domain_management.PostToplevelDomainHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -414,6 +429,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/toplevel-domain"] = domain_management.NewGetToplevelDomain(o.context, o.DomainManagementGetToplevelDomainHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/users"] = users_management.NewGetUsers(o.context, o.UsersManagementGetUsersHandler)
 
 	if o.handlers["POST"] == nil {
@@ -450,6 +470,11 @@ func (o *AuthServiceAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/reset-password"] = login.NewPostResetPassword(o.context, o.LoginPostResetPasswordHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/toplevel-domain"] = domain_management.NewPostToplevelDomain(o.context, o.DomainManagementPostToplevelDomainHandler)
 
 }
 
