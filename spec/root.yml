@@ -56,4 +56,4 @@ definitions:
   loginResponse:
     $ref: ./definitions/loginResponse.yml
 
-basePath: /news-api/v1
+basePath: /v1
